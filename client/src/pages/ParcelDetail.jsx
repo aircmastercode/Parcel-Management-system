@@ -215,7 +215,9 @@ const ParcelDetail = () => {
                   className={`p-4 rounded-lg ${
                     message.from_station === currentUser.station_id
                       ? 'bg-primary-50 ml-12'
-                      : 'bg-gray-50 mr-12'
+                      : message.to_station === currentUser.station_id
+                        ? 'bg-gray-50 mr-12'
+                        : 'bg-gray-50 border border-dashed border-gray-300' // For copies to other stations
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -223,6 +225,15 @@ const ParcelDetail = () => {
                       <span className="font-medium">{message.sender?.name}</span>
                       <span className="mx-2 text-gray-500">→</span>
                       <span className="font-medium">{message.receiver?.name}</span>
+                      
+                      {/* Indicate if this is a copy */}
+                      {message.to_station !== parcel?.sender_station_id && 
+                       message.to_station !== parcel?.receiver_station_id && 
+                       message.is_master_copied && !message.content.startsWith('[COPY]') && (
+                        <span className="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                          FYI Copy
+                        </span>
+                      )}
                     </div>
                     <span className="text-xs text-gray-500">
                       {new Date(message.createdAt).toLocaleString()}
@@ -234,6 +245,11 @@ const ParcelDetail = () => {
             ) : (
               <p className="text-gray-500">No messages yet.</p>
             )}
+          </div>
+          
+          {/* Information about message visibility */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+            <p>Note: All messages are visible to all stations for transparency and better coordination.</p>
           </div>
           
           {/* New message form with explicit station selection */}

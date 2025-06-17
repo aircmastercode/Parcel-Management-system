@@ -8,6 +8,11 @@ const { authenticate, isMaster } = require('../middlewares/auth');
 // @access  Private/Admin
 router.get('/', authenticate, isMaster, messageController.getMessages);
 
+// @route   GET /api/messages/all
+// @desc    Get all messages (accessible by all stations)
+// @access  Private
+router.get('/all', authenticate, messageController.getAllMessages);
+
 // @route   GET /api/messages/station/:stationId
 // @desc    Get messages for a specific station
 // @access  Private

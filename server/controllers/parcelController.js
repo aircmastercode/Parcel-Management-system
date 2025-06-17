@@ -162,7 +162,7 @@ exports.createParcel = async (req, res) => {
       status: 'pending'
     });
     
-    // Create an initial message (now mandatory)
+    // Create an initial message from sender to receiver
     await Message.create({
       from_station: sender_station_id,
       to_station: receiver_station_id,
@@ -171,6 +171,31 @@ exports.createParcel = async (req, res) => {
       read: false,
       is_master_copied: true
     });
+    
+    // Get all stations other than sender and receiver
+    const allStations = await Station.findAll({
+      where: {
+        id: {
+          [require('../models').Sequelize.Op.notIn]: [
+            sender_station_id,
+            receiver_station_id
+          ]
+        },
+        is_master: false
+      }
+    });
+    
+    // Notify all other stations about the new parcel
+    for (const station of allStations) {
+      await Message.create({
+        from_station: sender_station_id,
+        to_station: station.id,
+        parcel_id: newParcel.id,
+        content: `New parcel created with tracking number ${tracking_number}. Initial message: ${initial_message}`,
+        read: false,
+        is_master_copied: true
+      });
+    }
     
     // Get the created parcel with relations
     const parcelWithRelations = await Parcel.findByPk(newParcel.id, {
@@ -230,6 +255,32 @@ exports.updateParcelStatus = async (req, res) => {
       await Message.create({
         from_station: req.user.station_id,
         to_station: parcel.sender_station_id,
+        parcel_id: parcel.id,
+        content: `Parcel status updated to: ${status}`,
+        read: false,
+        is_master_copied: true
+      });
+    }
+    
+    // Get all stations other than sender, receiver, and current user's station
+    const allStations = await Station.findAll({
+      where: {
+        id: {
+          [require('../models').Sequelize.Op.notIn]: [
+            req.user.station_id,
+            parcel.sender_station_id,
+            parcel.receiver_station_id
+          ]
+        },
+        is_master: false
+      }
+    });
+    
+    // Notify all other stations about the status update
+    for (const station of allStations) {
+      await Message.create({
+        from_station: req.user.station_id,
+        to_station: station.id,
         parcel_id: parcel.id,
         content: `Parcel status updated to: ${status}`,
         read: false,

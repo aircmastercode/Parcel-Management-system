@@ -25,9 +25,15 @@ const StationDashboard = () => {
       const parcelsResponse = await api.get(`/api/parcels/station/${currentUser.station_id}`);
       setParcels(parcelsResponse.data);
       
-      // Get messages for this station
-      const messagesResponse = await api.get(`/api/messages/station/${currentUser.station_id}`);
-      setMessages(messagesResponse.data);
+      // Get all messages
+      const messagesResponse = await api.get('/api/messages/all');
+      
+      // Sort messages with most recent first
+      const sortedMessages = messagesResponse.data.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      
+      setMessages(sortedMessages);
       
     } catch (error) {
       console.error('Error loading station data:', error);
@@ -122,15 +128,39 @@ const StationDashboard = () => {
             </Link>
           </div>
           
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+            <p>Showing messages from all stations for better system visibility and coordination.</p>
+          </div>
+          
           {messages.length > 0 ? (
             <div className="space-y-4">
               {messages.slice(0, 5).map(message => (
-                <div key={message.id} className="border-l-4 border-primary-500 bg-gray-50 p-4">
+                <div 
+                  key={message.id} 
+                  className={`border-l-4 p-4 ${
+                    message.to_station === currentUser.station_id
+                      ? 'border-primary-500 bg-primary-50'
+                      : message.from_station === currentUser.station_id
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-300 bg-gray-50'
+                  }`}
+                >
                   <div className="flex justify-between">
                     <div>
                       <span className="font-medium">{message.sender?.name}</span>
                       <span className="mx-2 text-gray-500">→</span>
                       <span className="font-medium">{message.receiver?.name}</span>
+                      
+                      {message.to_station === currentUser.station_id && (
+                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          To Your Station
+                        </span>
+                      )}
+                      {message.from_station === currentUser.station_id && (
+                        <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                          From Your Station
+                        </span>
+                      )}
                     </div>
                     <span className="text-xs text-gray-500">
                       {new Date(message.createdAt).toLocaleDateString()}

@@ -21,7 +21,8 @@ const NewParcel = () => {
     sender_name: '',
     receiver_name: '',
     sender_contact: '',
-    receiver_contact: ''
+    receiver_contact: '',
+    initial_message: ''
   });
 
   useEffect(() => {
@@ -79,6 +80,12 @@ const NewParcel = () => {
     
     if (!formData.sender_name || !formData.receiver_name) {
       toast.error('Sender and receiver names are required');
+      return;
+    }
+    
+    // Validate initial message
+    if (!formData.initial_message.trim()) {
+      toast.error('Initial message is required');
       return;
     }
     
@@ -252,6 +259,22 @@ const NewParcel = () => {
                 onChange={handleChange}
                 className="form-input"
               />
+            </div>
+            
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 mt-4">Initial Message</h3>
+              <label htmlFor="initial_message" className="form-label">Message</label>
+              <textarea
+                id="initial_message"
+                name="initial_message"
+                value={formData.initial_message}
+                onChange={handleChange}
+                className="form-input"
+                rows="3"
+                placeholder="Enter an initial message about this parcel"
+                required
+              ></textarea>
+              <p className="mt-1 text-sm text-gray-500">This message will be sent to the receiver station.</p>
             </div>
           </div>
 

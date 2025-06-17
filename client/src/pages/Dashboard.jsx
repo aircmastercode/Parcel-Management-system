@@ -34,9 +34,14 @@ const Dashboard = () => {
       const parcelsResponse = await api.get(`/api/parcels/station/${currentUser.station_id}`);
       const parcels = parcelsResponse.data;
 
-      // Get unread messages
-      const messagesResponse = await api.get(`/api/messages/unread/${currentUser.station_id}`);
-      const unreadMessages = messagesResponse.data;
+      // Get all messages to provide a global view
+      const messagesResponse = await api.get(`/api/messages/all`);
+      const allMessages = messagesResponse.data;
+      
+      // Get unread messages directed to this station
+      const unreadMessages = allMessages.filter(m => 
+        m.to_station === currentUser.station_id && !m.read
+      );
 
       // Calculate statistics
       const pendingCount = parcels.filter(p => p.status === 'pending').length;

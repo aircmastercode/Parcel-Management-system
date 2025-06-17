@@ -10,7 +10,10 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('incoming');
+  
+  // We no longer need the incoming/outgoing filter since all messages will be visible
+  // But we'll keep a different type of filter for better organization
+  const [viewMode, setViewMode] = useState('all');
 
   useEffect(() => {
     loadMessages();
@@ -20,13 +23,9 @@ const Messages = () => {
     try {
       setLoading(true);
       
-      let response;
-      if (currentUser.role === 'master') {
-        response = await api.get('/api/messages');
-      } else {
-        response = await api.get(`/api/messages/station/${currentUser.station_id}`);
-      }
-      
+      // Always get all available messages
+      // The server will handle permissions
+      const response = await api.get('/api/messages/all');
       setMessages(response.data);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -50,7 +49,7 @@ const Messages = () => {
     }
   };
 
-  // Filter messages based on the selected filter
+  // Filter messages based on the selected filters
   const getFilteredMessages = () => {
     // First filter by read status
     let filteredByStatus = filter === 'all' 
@@ -59,15 +58,20 @@ const Messages = () => {
         ? messages.filter(message => !message.read)
         : messages.filter(message => message.read);
     
-    // Then filter by incoming/outgoing based on viewMode
-    if (currentUser.role !== 'master') {
-      if (viewMode === 'incoming') {
-        return filteredByStatus.filter(message => message.to_station === currentUser.station_id);
-      } else {
-        return filteredByStatus.filter(message => message.from_station === currentUser.station_id);
-      }
+    // Then filter by involvement (all, involving my station, or not involving my station)
+    if (viewMode === 'involving-me') {
+      return filteredByStatus.filter(message => 
+        message.from_station === currentUser.station_id || 
+        message.to_station === currentUser.station_id
+      );
+    } else if (viewMode === 'others') {
+      return filteredByStatus.filter(message => 
+        message.from_station !== currentUser.station_id && 
+        message.to_station !== currentUser.station_id
+      );
     }
     
+    // Default: return all messages
     return filteredByStatus;
   };
 
@@ -99,30 +103,38 @@ const Messages = () => {
       </div>
 
       {/* Message type tabs */}
-      {currentUser.role !== 'master' && (
-        <div className="flex border-b mb-6">
-          <button
-            onClick={() => setViewMode('incoming')}
-            className={`px-4 py-2 font-medium ${
-              viewMode === 'incoming'
-                ? 'text-primary-600 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Incoming Messages
-          </button>
-          <button
-            onClick={() => setViewMode('outgoing')}
-            className={`px-4 py-2 font-medium ${
-              viewMode === 'outgoing'
-                ? 'text-primary-600 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Outgoing Messages
-          </button>
-        </div>
-      )}
+      <div className="flex border-b mb-6">
+        <button
+          onClick={() => setViewMode('all')}
+          className={`px-4 py-2 font-medium ${
+            viewMode === 'all'
+              ? 'text-primary-600 border-b-2 border-primary-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          All Messages
+        </button>
+        <button
+          onClick={() => setViewMode('involving-me')}
+          className={`px-4 py-2 font-medium ${
+            viewMode === 'involving-me'
+              ? 'text-primary-600 border-b-2 border-primary-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Involving My Station
+        </button>
+        <button
+          onClick={() => setViewMode('others')}
+          className={`px-4 py-2 font-medium ${
+            viewMode === 'others'
+              ? 'text-primary-600 border-b-2 border-primary-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Other Stations
+        </button>
+      </div>
 
       {filteredMessages.length > 0 ? (
         <div className="space-y-4">
@@ -177,9 +189,11 @@ const Messages = () => {
       ) : (
         <div className="bg-white shadow rounded-lg p-6 text-center">
           <p className="text-gray-500">
-            {viewMode === 'incoming' 
-              ? 'No incoming messages available.' 
-              : 'No outgoing messages available.'}
+            {viewMode === 'involving-me' 
+              ? 'No messages involving your station.' 
+              : viewMode === 'others'
+                ? 'No messages between other stations.'
+                : 'No messages available.'}
           </p>
         </div>
       )}

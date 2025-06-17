@@ -31,6 +31,37 @@ exports.getMessages = async (req, res) => {
   }
 };
 
+// Get all messages (accessible by any station)
+exports.getAllMessages = async (req, res) => {
+  try {
+    const messages = await Message.findAll({
+      include: [
+        {
+          model: Station,
+          as: 'sender',
+          attributes: ['id', 'name', 'code']
+        },
+        {
+          model: Station,
+          as: 'receiver',
+          attributes: ['id', 'name', 'code']
+        },
+        {
+          model: Parcel,
+          as: 'parcel',
+          attributes: ['id', 'tracking_number', 'status']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error('Error getting all messages:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Get messages for a specific station
 exports.getStationMessages = async (req, res) => {
   try {
@@ -136,7 +167,7 @@ exports.createMessage = async (req, res) => {
       content,
       read: false
     });
-    
+
     // If the user is from master station or we need to copy master station,
     // create copy for master station if it's not already sent to/from master
     const masterStation = await Station.findOne({ where: { is_master: true } });
@@ -147,6 +178,31 @@ exports.createMessage = async (req, res) => {
         to_station: masterStation.id,
         parcel_id,
         content,
+        read: false,
+        is_master_copied: true
+      });
+    }
+    
+    // Get all stations other than sender, recipient, and master
+    const allStations = await Station.findAll({
+      where: {
+        id: {
+          [require('../models').Sequelize.Op.notIn]: [
+            from_station,
+            to_station,
+            masterStation?.id || 0
+          ]
+        }
+      }
+    });
+    
+    // Send copies of the message to all other stations
+    for (const station of allStations) {
+      await Message.create({
+        from_station,
+        to_station: station.id,
+        parcel_id,
+        content: `[COPY] ${content}`,
         read: false,
         is_master_copied: true
       });
