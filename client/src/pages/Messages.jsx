@@ -10,6 +10,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('incoming');
 
   useEffect(() => {
     loadMessages();
@@ -49,11 +50,28 @@ const Messages = () => {
     }
   };
 
-  const filteredMessages = filter === 'all' 
-    ? messages 
-    : filter === 'unread'
-      ? messages.filter(message => !message.read)
-      : messages.filter(message => message.read);
+  // Filter messages based on the selected filter
+  const getFilteredMessages = () => {
+    // First filter by read status
+    let filteredByStatus = filter === 'all' 
+      ? messages 
+      : filter === 'unread'
+        ? messages.filter(message => !message.read)
+        : messages.filter(message => message.read);
+    
+    // Then filter by incoming/outgoing based on viewMode
+    if (currentUser.role !== 'master') {
+      if (viewMode === 'incoming') {
+        return filteredByStatus.filter(message => message.to_station === currentUser.station_id);
+      } else {
+        return filteredByStatus.filter(message => message.from_station === currentUser.station_id);
+      }
+    }
+    
+    return filteredByStatus;
+  };
+
+  const filteredMessages = getFilteredMessages();
 
   if (loading) {
     return (
@@ -80,7 +98,33 @@ const Messages = () => {
         </div>
       </div>
 
-      {messages.length > 0 ? (
+      {/* Message type tabs */}
+      {currentUser.role !== 'master' && (
+        <div className="flex border-b mb-6">
+          <button
+            onClick={() => setViewMode('incoming')}
+            className={`px-4 py-2 font-medium ${
+              viewMode === 'incoming'
+                ? 'text-primary-600 border-b-2 border-primary-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Incoming Messages
+          </button>
+          <button
+            onClick={() => setViewMode('outgoing')}
+            className={`px-4 py-2 font-medium ${
+              viewMode === 'outgoing'
+                ? 'text-primary-600 border-b-2 border-primary-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Outgoing Messages
+          </button>
+        </div>
+      )}
+
+      {filteredMessages.length > 0 ? (
         <div className="space-y-4">
           {filteredMessages.map(message => (
             <div 
@@ -94,6 +138,14 @@ const Messages = () => {
                   <span className="font-medium">{message.sender?.name}</span>
                   <span className="mx-2 text-gray-500">→</span>
                   <span className="font-medium">{message.receiver?.name}</span>
+                  
+                  {/* Clearly indicate if this is a message to/from your station */}
+                  {message.to_station === currentUser.station_id && (
+                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">To Your Station</span>
+                  )}
+                  {message.from_station === currentUser.station_id && (
+                    <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">From Your Station</span>
+                  )}
                 </div>
                 <span className="text-xs text-gray-500">
                   {new Date(message.createdAt).toLocaleString()}
@@ -124,7 +176,11 @@ const Messages = () => {
         </div>
       ) : (
         <div className="bg-white shadow rounded-lg p-6 text-center">
-          <p className="text-gray-500">No messages available.</p>
+          <p className="text-gray-500">
+            {viewMode === 'incoming' 
+              ? 'No incoming messages available.' 
+              : 'No outgoing messages available.'}
+          </p>
         </div>
       )}
     </DashboardLayout>

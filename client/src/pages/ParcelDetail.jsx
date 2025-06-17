@@ -16,6 +16,7 @@ const ParcelDetail = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [targetStation, setTargetStation] = useState(null);
   
   useEffect(() => {
     loadParcelData();
@@ -31,6 +32,13 @@ const ParcelDetail = () => {
       
       if (parcelResponse.data.messages) {
         setMessages(parcelResponse.data.messages);
+      }
+      
+      // Set default target station
+      if (currentUser.station_id === parcelResponse.data.sender_station_id) {
+        setTargetStation(parcelResponse.data.receiver_station_id);
+      } else {
+        setTargetStation(parcelResponse.data.sender_station_id);
       }
       
     } catch (error) {
@@ -70,15 +78,16 @@ const ParcelDetail = () => {
       return;
     }
     
+    if (!targetStation) {
+      toast.error('Please select a recipient station');
+      return;
+    }
+    
     try {
       setLoading(true);
       
-      // Determine recipient station based on user's station and parcel
-      const isFromSender = currentUser.station_id === parcel.sender_station_id;
-      const toStation = isFromSender ? parcel.receiver_station_id : parcel.sender_station_id;
-      
       await api.post('/api/messages', {
-        to_station: toStation,
+        to_station: targetStation,
         parcel_id: parcel.id,
         content: newMessage
       });
@@ -91,6 +100,16 @@ const ParcelDetail = () => {
       toast.error('Failed to send message');
       setLoading(false);
     }
+  };
+
+  // Helper to get station name from ID
+  const getStationName = (stationId) => {
+    if (stationId === parcel?.sender_station_id) {
+      return parcel?.senderStation?.name;
+    } else if (stationId === parcel?.receiver_station_id) {
+      return parcel?.receiverStation?.name;
+    }
+    return 'Unknown Station';
   };
 
   if (loading && !parcel) {
@@ -200,7 +219,11 @@ const ParcelDetail = () => {
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium">{message.sender?.name}</span>
+                    <div>
+                      <span className="font-medium">{message.sender?.name}</span>
+                      <span className="mx-2 text-gray-500">→</span>
+                      <span className="font-medium">{message.receiver?.name}</span>
+                    </div>
                     <span className="text-xs text-gray-500">
                       {new Date(message.createdAt).toLocaleString()}
                     </span>
@@ -213,11 +236,42 @@ const ParcelDetail = () => {
             )}
           </div>
           
-          {/* New message form */}
+          {/* New message form with explicit station selection */}
           <form onSubmit={handleSendMessage}>
             <div className="mt-4">
+              <div className="mb-4">
+                <label htmlFor="target-station" className="form-label">
+                  Send Message To:
+                </label>
+                <select
+                  id="target-station"
+                  className="form-input"
+                  value={targetStation || ''}
+                  onChange={(e) => setTargetStation(Number(e.target.value))}
+                  required
+                >
+                  <option value="">Select Station</option>
+                  
+                  {/* Only show sender station if user is not from sender station */}
+                  {currentUser.station_id !== parcel?.sender_station_id && (
+                    <option value={parcel?.sender_station_id}>
+                      {parcel?.senderStation?.name} (Sender)
+                    </option>
+                  )}
+                  
+                  {/* Only show receiver station if user is not from receiver station */}
+                  {currentUser.station_id !== parcel?.receiver_station_id && (
+                    <option value={parcel?.receiver_station_id}>
+                      {parcel?.receiverStation?.name} (Receiver)
+                    </option>
+                  )}
+                  
+                  {/* If user is master station, no need for additional options as they're already included above */}
+                </select>
+              </div>
+
               <label htmlFor="message" className="form-label">
-                New Message
+                Message Content
               </label>
               <textarea
                 id="message"
@@ -226,12 +280,18 @@ const ParcelDetail = () => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message here..."
+                required
               ></textarea>
             </div>
             <div className="mt-4">
               <button type="submit" className="btn-primary">
                 Send Message
               </button>
+              {targetStation && (
+                <p className="mt-2 text-sm text-gray-500">
+                  This message will be sent to: {getStationName(targetStation)}
+                </p>
+              )}
             </div>
           </form>
         </div>
