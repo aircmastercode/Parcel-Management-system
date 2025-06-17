@@ -11,6 +11,9 @@ const StationDashboard = lazy(() => import('./pages/StationDashboard'));
 const MasterDashboard = lazy(() => import('./pages/MasterDashboard'));
 const ParcelDetail = lazy(() => import('./pages/ParcelDetail'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const Parcels = lazy(() => import('./pages/Parcels'));
+const Messages = lazy(() => import('./pages/Messages'));
+const NewParcel = lazy(() => import('./pages/NewParcel'));
 
 function App() {
   const { currentUser, loading } = useAuth();
@@ -51,6 +54,24 @@ function App() {
         <Route path="/master-dashboard" element={
           <ProtectedRoute requiredRole="master">
             <MasterDashboard />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/parcels" element={
+          <ProtectedRoute>
+            <Parcels />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/parcels/new" element={
+          <ProtectedRoute>
+            <NewParcel />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <Messages />
           </ProtectedRoute>
         } />
 
