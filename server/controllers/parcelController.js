@@ -122,8 +122,16 @@ exports.createParcel = async (req, res) => {
       sender_name,
       receiver_name,
       sender_contact,
-      receiver_contact
+      receiver_contact,
+      initial_message
     } = req.body;
+    
+    // Check if required fields are provided
+    if (!sender_station_id || !receiver_station_id || !sender_name || !receiver_name || !initial_message) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: sender_station_id, receiver_station_id, sender_name, receiver_name, and initial_message are required' 
+      });
+    }
     
     // Check if sender station exists
     const senderStation = await Station.findByPk(sender_station_id);
@@ -154,12 +162,12 @@ exports.createParcel = async (req, res) => {
       status: 'pending'
     });
     
-    // Create a notification message
+    // Create an initial message (now mandatory)
     await Message.create({
       from_station: sender_station_id,
       to_station: receiver_station_id,
       parcel_id: newParcel.id,
-      content: `New parcel ${tracking_number} has been registered for delivery.`,
+      content: initial_message,
       read: false,
       is_master_copied: true
     });

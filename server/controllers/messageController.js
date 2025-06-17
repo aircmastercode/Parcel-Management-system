@@ -128,17 +128,6 @@ exports.createMessage = async (req, res) => {
       return res.status(400).json({ message: 'Parcel not found' });
     }
     
-    // Check if user's station is related to this parcel (sender or receiver)
-    // Only exception is master station users who can message any station
-    const userStation = await Station.findByPk(from_station);
-    if (!userStation.is_master && 
-        from_station !== parcel.sender_station_id && 
-        from_station !== parcel.receiver_station_id) {
-      return res.status(403).json({ 
-        message: 'Your station is not associated with this parcel' 
-      });
-    }
-    
     // Create the message
     const newMessage = await Message.create({
       from_station,
