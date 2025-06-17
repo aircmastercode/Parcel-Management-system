@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { sequelize } = require('./models');
 
 // Import routes
@@ -18,17 +19,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/parcels', parcelRoutes);
 app.use('/api/messages', messageRoutes);
 
-// Base route
-app.get('/', (req, res) => {
-  res.send('Parcel Management System API');
-});
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React frontend app
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
+} else {
+  // Base route for development API testing
+  app.get('/', (req, res) => {
+    res.send('Parcel Management System API');
+  });
+}
 
 // Import seeder
 const seedDatabase = require('./utils/seeder');
