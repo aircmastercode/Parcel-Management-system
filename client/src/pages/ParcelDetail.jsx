@@ -1,0 +1,243 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import DashboardLayout from '../components/DashboardLayout';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import { toast } from 'react-toastify';
+
+const ParcelDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  
+  const [loading, setLoading] = useState(true);
+  const [parcel, setParcel] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [newStatus, setNewStatus] = useState('');
+  
+  useEffect(() => {
+    loadParcelData();
+  }, [id]);
+  
+  const loadParcelData = async () => {
+    try {
+      setLoading(true);
+      
+      const parcelResponse = await api.get(`/api/parcels/${id}`);
+      setParcel(parcelResponse.data);
+      setNewStatus(parcelResponse.data.status);
+      
+      if (parcelResponse.data.messages) {
+        setMessages(parcelResponse.data.messages);
+      }
+      
+    } catch (error) {
+      console.error('Error loading parcel:', error);
+      toast.error('Error loading parcel data');
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      await api.put(`/api/parcels/${id}/status`, {
+        status: newStatus
+      });
+      
+      toast.success('Parcel status updated successfully');
+      loadParcelData();
+    } catch (error) {
+      console.error('Error updating parcel status:', error);
+      toast.error('Failed to update parcel status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    
+    if (!newMessage.trim()) {
+      toast.error('Please enter a message');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Determine recipient station based on user's station and parcel
+      const isFromSender = currentUser.station_id === parcel.sender_station_id;
+      const toStation = isFromSender ? parcel.receiver_station_id : parcel.sender_station_id;
+      
+      await api.post('/api/messages', {
+        to_station: toStation,
+        parcel_id: parcel.id,
+        content: newMessage
+      });
+      
+      setNewMessage('');
+      toast.success('Message sent successfully');
+      loadParcelData();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      setLoading(false);
+    }
+  };
+
+  if (loading && !parcel) {
+    return (
+      <DashboardLayout title="Parcel Details">
+        <LoadingSpinner />
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout title="Parcel Details">
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800">Parcel {parcel?.tracking_number}</h2>
+        <span className={`px-4 py-1 rounded-full text-sm font-medium ${
+          parcel?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+          parcel?.status === 'in_transit' ? 'bg-blue-100 text-blue-800' :
+          parcel?.status === 'delivered' ? 'bg-green-100 text-green-800' :
+          parcel?.status === 'returned' ? 'bg-gray-100 text-gray-800' :
+          'bg-red-100 text-red-800'
+        }`}>
+          {parcel?.status?.replace('_', ' ').toUpperCase()}
+        </span>
+      </div>
+
+      {/* Parcel information */}
+      <div className="bg-white shadow rounded-lg mb-6">
+        <div className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Parcel Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <p className="text-sm text-gray-500">From Station</p>
+              <p className="font-medium">{parcel?.senderStation?.name} ({parcel?.senderStation?.code})</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">To Station</p>
+              <p className="font-medium">{parcel?.receiverStation?.name} ({parcel?.receiverStation?.code})</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Sender</p>
+              <p className="font-medium">{parcel?.sender_name}</p>
+              <p className="text-sm text-gray-500">{parcel?.sender_contact}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Receiver</p>
+              <p className="font-medium">{parcel?.receiver_name}</p>
+              <p className="text-sm text-gray-500">{parcel?.receiver_contact}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Weight</p>
+              <p className="font-medium">{parcel?.weight} kg</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Created At</p>
+              <p className="font-medium">{new Date(parcel?.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+          {parcel?.description && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-500">Description</p>
+              <p className="font-medium">{parcel?.description}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Update Status Form */}
+      <div className="bg-white shadow rounded-lg mb-6">
+        <div className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Update Status</h3>
+          <form onSubmit={handleStatusChange}>
+            <div className="flex items-center">
+              <select 
+                value={newStatus} 
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="form-input mr-4"
+              >
+                <option value="pending">Pending</option>
+                <option value="in_transit">In Transit</option>
+                <option value="delivered">Delivered</option>
+                <option value="returned">Returned</option>
+                <option value="lost">Lost</option>
+              </select>
+              <button type="submit" className="btn-primary">
+                Update Status
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Messages section */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Messages</h3>
+          
+          {/* Message list */}
+          <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+            {messages.length > 0 ? (
+              messages.map((message) => (
+                <div 
+                  key={message.id} 
+                  className={`p-4 rounded-lg ${
+                    message.from_station === currentUser.station_id
+                      ? 'bg-primary-50 ml-12'
+                      : 'bg-gray-50 mr-12'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium">{message.sender?.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(message.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-800">{message.content}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No messages yet.</p>
+            )}
+          </div>
+          
+          {/* New message form */}
+          <form onSubmit={handleSendMessage}>
+            <div className="mt-4">
+              <label htmlFor="message" className="form-label">
+                New Message
+              </label>
+              <textarea
+                id="message"
+                rows={3}
+                className="form-input"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message here..."
+              ></textarea>
+            </div>
+            <div className="mt-4">
+              <button type="submit" className="btn-primary">
+                Send Message
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default ParcelDetail; 
