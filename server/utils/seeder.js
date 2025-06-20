@@ -4,6 +4,14 @@ async function seedDatabase() {
   try {
     console.log('Seeding database...');
     
+    // Check if stations already exist (we don't want to overwrite our custom railway stations)
+    const stationCount = await Station.count();
+    
+    if (stationCount > 0) {
+      console.log('Stations already exist, skipping default station creation');
+      return;
+    }
+    
     // Create stations
     console.log('Creating stations...');
     const masterStation = await Station.create({

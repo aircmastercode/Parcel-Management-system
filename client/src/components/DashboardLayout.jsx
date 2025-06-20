@@ -152,11 +152,12 @@ const SidebarContent = ({ currentUser }) => {
       
       <div className="mt-8">
         <h3 className="px-3 text-xs font-semibold text-white uppercase tracking-wider">
-          Station Information
+          Railway Station Information
         </h3>
         <div className="mt-2 px-3 py-2 text-white bg-primary-700 rounded-md">
           <p className="text-sm font-medium">{currentUser?.station?.name}</p>
-          <p className="text-xs mt-1">{currentUser?.station?.code}</p>
+          <p className="text-xs mt-1">Station Code: {currentUser?.station?.code}</p>
+          <p className="text-xs mt-1">User ID: {currentUser?.name}</p>
         </div>
       </div>
     </nav>
