@@ -1,21 +1,23 @@
-# Parcel Management System
+# Railway Parcel Management System
 
-A full-stack application for managing parcels between different stations. The system allows for OTP-based authentication, station-specific views, and the ability to exchange messages between stations about parcels.
+A full-stack application for managing parcels between different railway stations. The system allows for OTP-based authentication, station-specific views, and the ability to exchange messages between stations about parcels.
 
 ## Features
 
-- **User Management**: Station-based users with role-based permissions
-- **OTP Authentication**: Login via one-time passwords sent to email/phone
-- **Parcel Tracking**: Create, update, and monitor parcels between stations
+- **User Management**: Railway station-based users with role-based permissions
+- **OTP Authentication**: Login via one-time passwords sent to email
+- **Parcel Tracking**: Create, update, and monitor parcels between railway stations
+- **Parcel Images**: Upload and view images of parcels for better identification
 - **Messaging System**: Inter-station communication about parcels
-- **Master Station**: Special station with visibility into all messages and parcels
+- **Master Station**: New Delhi (NDLS) station with visibility into all messages and parcels
 
 ## Tech Stack
 
 - **Frontend**: React with Vite, styled with Tailwind CSS
 - **Backend**: Express.js (Node.js)
-- **Database**: MySQL with Sequelize ORM
+- **Database**: MySQL with Sequelize ORM (can also use SQLite)
 - **Authentication**: OTP-based with JWT for session management
+- **File Storage**: Local file storage for parcel images
 
 ## Project Structure
 
@@ -41,6 +43,7 @@ A full-stack application for managing parcels between different stations. The sy
 │   ├── middlewares/     # Express middlewares
 │   ├── models/          # Sequelize models
 │   ├── routes/          # API routes
+│   ├── uploads/         # Uploaded files storage
 │   ├── utils/           # Utility functions
 │   ├── server.js        # Server entry point
 │   └── package.json     # Backend dependencies
@@ -54,54 +57,99 @@ A full-stack application for managing parcels between different stations. The sy
 ### Prerequisites
 
 - Node.js (v14 or later)
-- MySQL (v8 or later) or MongoDB
+- MySQL (v8 or later) or SQLite
 - npm or yarn
 
-### Backend Setup
+### Database Setup
 
-1. Navigate to the server directory:
-   ```bash
-   cd server
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file from the example:
-   ```bash
-   cp config.env.example .env
-   ```
-
-4. Edit the `.env` file with your database credentials and other settings.
-
-5. Create the MySQL database:
+1. Create a MySQL database named `parcel_management`:
    ```sql
    CREATE DATABASE parcel_management;
    ```
 
-6. Start the server in development mode:
+### Installation
+
+1. Clone the repository and install dependencies:
    ```bash
+   git clone <repository-url>
+   cd railway-parcel-management-system
+   npm run install:all
+   ```
+
+2. Create a `.env` file in the server directory:
+   ```bash
+   cd server
+   cp config.env.example .env
+   ```
+
+3. Update the `.env` file with your database credentials.
+
+### Running the System
+
+1. To set up the railway stations and users:
+   ```bash
+   cd server
+   node update-stations.js
+   ```
+
+2. Start the server (backend):
+   ```bash
+   # From the server directory
+   node server.js
+   # or with nodemon for development:
+   nodemon server.js
+   ```
+
+3. Start the client (frontend) in a separate terminal:
+   ```bash
+   # From the client directory
    npm run dev
    ```
 
-### Frontend Setup
-
-1. Navigate to the client directory:
-   ```bash
-   cd client
+4. Access the application at:
    ```
-
-2. Install dependencies:
-   ```bash
-   npm install
+   Frontend: http://localhost:3000
+   Backend API: http://localhost:8000
    ```
+   
+Note: The system is configured to use specific ports:
+- Frontend (React): Port 3000
+- Backend (Express): Port 8000
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+## Railway Stations and Users
+
+The system is configured with the following railway stations:
+
+| Station Code | Station Name         | Role      |
+|--------------|----------------------|-----------|
+| CNB          | KANPUR CENTRAL JN.   | station   |
+| DHN          | DHANBAD JN.          | station   |
+| DLI          | DELHI JN.            | station   |
+| GAYA         | GAYA JN.             | station   |
+| HWH          | HOWRAH JN.           | station   |
+| NDLS         | NEW DELHI            | master    |
+| SDAH         | SEALDAH              | station   |
+
+* NEW DELHI (NDLS) is the master station and has access to all parcels and messages in the system.
+* Each station has associated user accounts. Only the master station (NDLS) can create new users and assign them to stations.
+
+## User-Station Assignment
+
+In this system:
+1. Each user is assigned to a specific railway station
+2. The master station (NEW DELHI) can see all parcels and messages across all stations
+3. Other stations can see:
+   - Their own parcels (sent or received)
+   - All messages for system-wide transparency
+
+## Authentication
+
+To login, use an email address associated with a railway station user. The system uses OTP-based authentication. In development mode, the OTP code is displayed in the server console logs.
+
+Example console output:
+```
+MOCK OTP SERVICE: OTP 123456 sent to test@example.com
+```
 
 ## API Endpoints
 
@@ -129,51 +177,19 @@ A full-stack application for managing parcels between different stations. The sy
 - `GET /api/parcels/station/:stationId` - Get parcels for a station
 - `GET /api/parcels/:id` - Get parcel by ID
 - `POST /api/parcels` - Create a new parcel
+- `POST /api/parcels/:id/image` - Upload parcel image
 - `PUT /api/parcels/:id/status` - Update parcel status
 - `DELETE /api/parcels/:id` - Delete a parcel (master only)
 
 ### Messages
 - `GET /api/messages` - Get all messages (master only)
+- `GET /api/messages/all` - Get all messages for any station
 - `GET /api/messages/station/:stationId` - Get messages for a station
 - `GET /api/messages/unread/:stationId` - Get unread messages for a station
 - `POST /api/messages` - Create a new message
 - `PUT /api/messages/:id/read` - Mark message as read
 - `DELETE /api/messages/:id` - Delete a message
 
-## Test Users
-
-After running the database seeder, the following test users will be available:
-
-1. **Master Station User**
-   - Email: admin@example.com
-   - Station: Head Office
-
-2. **Downtown Branch User**
-   - Email: downtown@example.com
-   - Station: Downtown Branch
-
-3. **Westside Station User**
-   - Email: chicago@example.com
-   - Station: Westside Station
-
-4. **Central Hub User**
-   - Email: la@example.com
-   - Station: Central Hub
-
-To login, use the OTP system. In development, OTPs are logged to the console.
-
 ## License
 
 This project is licensed under the MIT License.
-
-## Authors
-
-- [Your Name]
-
-## Acknowledgements
-
-- Express.js
-- React
-- Sequelize
-- MySQL
-- Tailwind CSS

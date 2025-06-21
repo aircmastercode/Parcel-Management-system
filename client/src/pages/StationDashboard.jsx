@@ -54,7 +54,12 @@ const StationDashboard = () => {
     <DashboardLayout title="Station Dashboard">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800">{currentUser?.station?.name}</h2>
-        <p className="text-gray-600">Station Code: {currentUser?.station?.code}</p>
+        <div className="flex items-center">
+          <span className="px-3 py-1 bg-primary-100 text-primary-800 font-bold rounded-lg mr-2">
+            {currentUser?.station?.code}
+          </span>
+          <p className="text-gray-600">User ID: {currentUser?.name}</p>
+        </div>
       </div>
 
       {/* Recent Parcels */}

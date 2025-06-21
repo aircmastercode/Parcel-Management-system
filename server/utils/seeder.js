@@ -1,8 +1,12 @@
 const { Station, User, Parcel, Message } = require('../models');
+const seedAdmins = require('./adminSeeder');
 
 async function seedDatabase() {
   try {
     console.log('Seeding database...');
+    
+    // Seed admin users
+    await seedAdmins();
     
     // Check if stations already exist (we don't want to overwrite our custom railway stations)
     const stationCount = await Station.count();
@@ -12,67 +16,105 @@ async function seedDatabase() {
       return;
     }
     
-    // Create stations
+    // Create stations WITHOUT any master station
     console.log('Creating stations...');
-    const masterStation = await Station.create({
-      name: 'Head Office',
-      location: 'New York',
-      is_master: true,
-      code: 'HQ001'
-    });
-    
     const station1 = await Station.create({
-      name: 'Downtown Branch',
-      location: 'New York',
+      name: 'KANPUR CENTRAL JN.',
+      location: 'Kanpur',
       is_master: false,
-      code: 'NYC01'
+      code: 'CNB'
     });
     
     const station2 = await Station.create({
-      name: 'Westside Station',
-      location: 'Chicago',
+      name: 'DHANBAD JN.',
+      location: 'Dhanbad',
       is_master: false,
-      code: 'CHI01'
+      code: 'DHN'
     });
     
     const station3 = await Station.create({
-      name: 'Central Hub',
-      location: 'Los Angeles',
+      name: 'DELHI JN.',
+      location: 'Delhi',
       is_master: false,
-      code: 'LA001'
+      code: 'DLI'
+    });
+    
+    const station4 = await Station.create({
+      name: 'GAYA JN.',
+      location: 'Gaya',
+      is_master: false,
+      code: 'GAYA'
+    });
+    
+    const station5 = await Station.create({
+      name: 'HOWRAH JN.',
+      location: 'Howrah',
+      is_master: false,
+      code: 'HWH'
+    });
+    
+    const station6 = await Station.create({
+      name: 'NEW DELHI',
+      location: 'New Delhi',
+      is_master: false,
+      code: 'NDLS'
+    });
+    
+    const station7 = await Station.create({
+      name: 'SEALDAH',
+      location: 'Sealdah',
+      is_master: false,
+      code: 'SDAH'
     });
     
     // Create users
     console.log('Creating users...');
-    const masterUser = await User.create({
-      name: 'Admin User',
-      email: 'admin@example.com',
-      phone: '1234567890',
-      station_id: masterStation.id,
-      role: 'master'
-    });
-    
     const station1User = await User.create({
-      name: 'Downtown Manager',
-      email: 'downtown@example.com',
-      phone: '2234567890',
+      name: 'TEST',
+      email: 'cnb@railway.com',
       station_id: station1.id,
       role: 'user'
     });
     
     const station2User = await User.create({
-      name: 'Chicago Manager',
-      email: 'chicago@example.com',
-      phone: '3234567890',
+      name: 'DHNTEST',
+      email: 'dhn@railway.com',
       station_id: station2.id,
       role: 'user'
     });
     
     const station3User = await User.create({
-      name: 'LA Manager',
-      email: 'la@example.com',
-      phone: '4234567890',
+      name: 'VVJ',
+      email: 'dli@railway.com',
       station_id: station3.id,
+      role: 'user'
+    });
+    
+    const station4User = await User.create({
+      name: 'VSC',
+      email: 'gaya@railway.com',
+      station_id: station4.id,
+      role: 'user'
+    });
+    
+    const station5User = await User.create({
+      name: 'VPW',
+      email: 'hwh@railway.com',
+      station_id: station5.id,
+      role: 'user'
+    });
+    
+    const station6User = await User.create({
+      name: 'XYZ',
+      email: 'ndls@railway.com',
+      station_id: station6.id,
+      role: 'user'
+    });
+    
+    const station7User = await User.create({
+      name: 'SDAHTEST',
+      email: 'sdah@railway.com',
+      station_id: station7.id,
       role: 'user'
     });
     

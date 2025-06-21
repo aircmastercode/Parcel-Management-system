@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
     receiver_contact: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    image_url: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     tableName: 'parcels',

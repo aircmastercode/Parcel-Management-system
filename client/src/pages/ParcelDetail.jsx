@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -17,6 +17,10 @@ const ParcelDetail = () => {
   const [newMessage, setNewMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [targetStation, setTargetStation] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
   
   useEffect(() => {
     loadParcelData();
@@ -102,6 +106,69 @@ const ParcelDetail = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image size must be less than 5MB');
+        fileInputRef.current.value = "";
+        return;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Only JPEG, PNG, and JPG images are allowed');
+        fileInputRef.current.value = "";
+        return;
+      }
+      
+      setImage(file);
+      
+      // Create image preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (e) => {
+    e.preventDefault();
+    
+    if (!image) {
+      toast.error('Please select an image first');
+      return;
+    }
+    
+    try {
+      setUploadingImage(true);
+      
+      const formData = new FormData();
+      formData.append('image', image);
+      
+      await api.post(`/api/parcels/${id}/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      toast.success('Image uploaded successfully');
+      setImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
+      loadParcelData();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   // Helper to get station name from ID
   const getStationName = (stationId) => {
     if (stationId === parcel?.sender_station_id) {
@@ -139,6 +206,52 @@ const ParcelDetail = () => {
       <div className="bg-white shadow rounded-lg mb-6">
         <div className="p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Parcel Information</h3>
+          
+          {/* Display parcel image if available */}
+          {parcel?.image_url && (
+            <div className="mb-6 flex justify-center">
+              <img 
+                src={parcel.image_url} 
+                alt="Parcel" 
+                className="max-h-96 rounded-lg shadow-md"
+              />
+            </div>
+          )}
+          
+          {/* Image upload form if no image exists */}
+          {!parcel?.image_url && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="text-md font-medium text-gray-800 mb-3">Upload Parcel Image</h4>
+              <div className="flex items-center">
+                <input
+                  type="file"
+                  id="parcel-image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  ref={fileInputRef}
+                  className="form-input"
+                />
+                <button 
+                  onClick={uploadImage}
+                  disabled={!image || uploadingImage}
+                  className="ml-4 btn-primary"
+                >
+                  {uploadingImage ? 'Uploading...' : 'Upload'}
+                </button>
+              </div>
+              {imagePreview && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="max-h-60 rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
             <div>
               <p className="text-sm text-gray-500">From Station</p>
@@ -281,8 +394,6 @@ const ParcelDetail = () => {
                       {parcel?.receiverStation?.name} (Receiver)
                     </option>
                   )}
-                  
-                  {/* If user is master station, no need for additional options as they're already included above */}
                 </select>
               </div>
 

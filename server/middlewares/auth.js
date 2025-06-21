@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, Admin } = require('../models');
 
 exports.authenticate = async (req, res, next) => {
   try {
@@ -24,6 +24,40 @@ exports.authenticate = async (req, res, next) => {
     }
     
     req.user = user;
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Token is not valid' });
+  }
+};
+
+exports.adminAuth = async (req, res, next) => {
+  try {
+    // Get token from header
+    const token = req.header('x-auth-token');
+    
+    // Check if no token
+    if (!token) {
+      return res.status(401).json({ message: 'No token, authorization denied' });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_jwt_secret');
+    
+    // Check if token has admin flag
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ message: 'Not authorized as admin' });
+    }
+    
+    // Add admin from payload
+    const admin = await Admin.findByPk(decoded.id, {
+      attributes: { exclude: ['last_otp', 'otp_expires_at'] }
+    });
+    
+    if (!admin) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+    
+    req.admin = admin;
     next();
   } catch (err) {
     res.status(401).json({ message: 'Token is not valid' });

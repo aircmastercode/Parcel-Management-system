@@ -67,8 +67,13 @@ const MasterDashboard = () => {
   return (
     <DashboardLayout title="Master Dashboard">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Master Control Panel</h2>
-        <p className="text-gray-600">{currentUser?.station?.name} - System Overview</p>
+        <h2 className="text-2xl font-bold text-gray-800">Railway Control Panel</h2>
+        <div className="flex items-center">
+          <span className="px-3 py-1 bg-primary-100 text-primary-800 font-bold rounded-lg mr-2">
+            {currentUser?.station?.code}
+          </span>
+          <p className="text-gray-600">{currentUser?.station?.name} - System Overview</p>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -158,17 +163,16 @@ const MasterDashboard = () => {
 
       {/* Station Status */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Station Status</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Railway Station Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stations.map(station => (
             <div key={station.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-gray-800">{station.name}</h4>
-                <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                  Active
+                <span className="text-xs font-bold bg-primary-100 text-primary-800 px-3 py-1 rounded-lg">
+                  {station.code}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">Code: {station.code}</p>
               <p className="text-sm text-gray-500">Location: {station.location}</p>
               <p className="text-sm text-gray-600 mt-2">
                 {parcels.filter(p => p.sender_station_id === station.id || p.receiver_station_id === station.id).length} parcels

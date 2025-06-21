@@ -40,16 +40,16 @@ const Parcels = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="Parcels">
+      <DashboardLayout title="Railway Parcels">
         <LoadingSpinner />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Parcels">
+    <DashboardLayout title="Railway Parcels">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Parcels</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Manage Railway Parcels</h2>
         <div className="flex items-center space-x-2">
           <select
             value={filter}

@@ -79,16 +79,16 @@ const Messages = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="Messages">
+      <DashboardLayout title="Railway Messages">
         <LoadingSpinner />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Messages">
+    <DashboardLayout title="Railway Messages">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Message Center</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Railway Message Center</h2>
         <div className="flex items-center space-x-2">
           <select
             value={filter}

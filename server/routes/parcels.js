@@ -23,6 +23,11 @@ router.get('/:id', authenticate, parcelController.getParcelById);
 // @access  Private
 router.post('/', authenticate, parcelController.createParcel);
 
+// @route   POST /api/parcels/:id/image
+// @desc    Upload parcel image
+// @access  Private
+router.post('/:id/image', authenticate, parcelController.uploadParcelImage);
+
 // @route   PUT /api/parcels/:id/status
 // @desc    Update parcel status
 // @access  Private

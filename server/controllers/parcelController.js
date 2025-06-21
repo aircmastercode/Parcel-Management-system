@@ -1,5 +1,7 @@
 const { Parcel, Station, Message } = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
 
 // Get all parcels
 exports.getParcels = async (req, res) => {
@@ -111,6 +113,50 @@ exports.getParcelsByStation = async (req, res) => {
   }
 };
 
+// Upload parcel image
+exports.uploadParcelImage = async (req, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ message: 'No image file uploaded' });
+    }
+
+    const parcelId = req.params.id;
+    const parcel = await Parcel.findByPk(parcelId);
+    
+    if (!parcel) {
+      return res.status(404).json({ message: 'Parcel not found' });
+    }
+    
+    const imageFile = req.files.image;
+    const uploadDir = path.join(__dirname, '../uploads/parcels');
+    
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    // Generate unique filename
+    const uniqueFileName = `${parcel.tracking_number}-${Date.now()}${path.extname(imageFile.name)}`;
+    const uploadPath = path.join(uploadDir, uniqueFileName);
+    
+    // Move the file to upload directory
+    await imageFile.mv(uploadPath);
+    
+    // Update parcel with image URL
+    const imageUrl = `/uploads/parcels/${uniqueFileName}`;
+    parcel.image_url = imageUrl;
+    await parcel.save();
+    
+    res.status(200).json({ 
+      message: 'Image uploaded successfully', 
+      image_url: imageUrl 
+    });
+  } catch (error) {
+    console.error('Error uploading parcel image:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Create a new parcel
 exports.createParcel = async (req, res) => {
   try {
@@ -162,6 +208,29 @@ exports.createParcel = async (req, res) => {
       status: 'pending'
     });
     
+    // Handle image upload if included in the request
+    if (req.files && req.files.image) {
+      const imageFile = req.files.image;
+      const uploadDir = path.join(__dirname, '../uploads/parcels');
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      // Generate unique filename
+      const uniqueFileName = `${tracking_number}-${Date.now()}${path.extname(imageFile.name)}`;
+      const uploadPath = path.join(uploadDir, uniqueFileName);
+      
+      // Move the file to upload directory
+      await imageFile.mv(uploadPath);
+      
+      // Update parcel with image URL
+      const imageUrl = `/uploads/parcels/${uniqueFileName}`;
+      newParcel.image_url = imageUrl;
+      await newParcel.save();
+    }
+    
     // Create an initial message from sender to receiver
     await Message.create({
       from_station: sender_station_id,
@@ -172,30 +241,38 @@ exports.createParcel = async (req, res) => {
       is_master_copied: true
     });
     
-    // Get all stations other than sender and receiver
-    const allStations = await Station.findAll({
-      where: {
-        id: {
-          [require('../models').Sequelize.Op.notIn]: [
-            sender_station_id,
-            receiver_station_id
-          ]
-        },
-        is_master: false
-      }
+    // Get master station
+    const masterStation = await Station.findOne({
+      where: { is_master: true }
     });
     
-    // Notify all other stations about the new parcel
-    for (const station of allStations) {
+    // If sender or receiver is not master station, send a copy to master
+    if (masterStation && 
+        masterStation.id !== sender_station_id && 
+        masterStation.id !== receiver_station_id) {
       await Message.create({
         from_station: sender_station_id,
-        to_station: station.id,
+        to_station: masterStation.id,
         parcel_id: newParcel.id,
         content: `New parcel created with tracking number ${tracking_number}. Initial message: ${initial_message}`,
         read: false,
         is_master_copied: true
       });
     }
+    
+    // Get all stations other than sender, receiver, and master
+    const allStations = await Station.findAll({
+      where: {
+        id: {
+          [require('../models').Sequelize.Op.notIn]: [
+            sender_station_id,
+            receiver_station_id,
+            masterStation ? masterStation.id : 0
+          ]
+        },
+        is_master: false
+      }
+    });
     
     // Get the created parcel with relations
     const parcelWithRelations = await Parcel.findByPk(newParcel.id, {
@@ -262,25 +339,19 @@ exports.updateParcelStatus = async (req, res) => {
       });
     }
     
-    // Get all stations other than sender, receiver, and current user's station
-    const allStations = await Station.findAll({
-      where: {
-        id: {
-          [require('../models').Sequelize.Op.notIn]: [
-            req.user.station_id,
-            parcel.sender_station_id,
-            parcel.receiver_station_id
-          ]
-        },
-        is_master: false
-      }
+    // Get master station
+    const masterStation = await Station.findOne({
+      where: { is_master: true }
     });
     
-    // Notify all other stations about the status update
-    for (const station of allStations) {
+    // If user's station and sender/receiver are not master station, notify master station
+    if (masterStation && 
+        masterStation.id !== req.user.station_id &&
+        masterStation.id !== parcel.sender_station_id &&
+        masterStation.id !== parcel.receiver_station_id) {
       await Message.create({
         from_station: req.user.station_id,
-        to_station: station.id,
+        to_station: masterStation.id,
         parcel_id: parcel.id,
         content: `Parcel status updated to: ${status}`,
         read: false,
@@ -319,6 +390,14 @@ exports.deleteParcel = async (req, res) => {
       await Message.destroy({
         where: { parcel_id: parcel.id }
       });
+    }
+    
+    // Delete image if exists
+    if (parcel.image_url) {
+      const imagePath = path.join(__dirname, '..', parcel.image_url);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
     }
     
     await parcel.destroy();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -12,6 +12,9 @@ const NewParcel = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [stations, setStations] = useState([]);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     sender_station_id: '',
@@ -59,6 +62,41 @@ const NewParcel = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image size must be less than 5MB');
+        fileInputRef.current.value = "";
+        return;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Only JPEG, PNG, and JPG images are allowed');
+        fileInputRef.current.value = "";
+        return;
+      }
+      
+      setImage(file);
+      
+      // Create image preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -92,15 +130,32 @@ const NewParcel = () => {
     try {
       setSubmitting(true);
       
-      // Convert data types
-      const payload = {
-        ...formData,
-        sender_station_id: parseInt(formData.sender_station_id),
-        receiver_station_id: parseInt(formData.receiver_station_id),
-        weight: formData.weight ? parseFloat(formData.weight) : null
-      };
+      // Create FormData object for sending data + file
+      const parcelData = new FormData();
       
-      const response = await api.post('/api/parcels', payload);
+      // Add text fields to FormData
+      Object.keys(formData).forEach(key => {
+        if (key === 'sender_station_id' || key === 'receiver_station_id') {
+          parcelData.append(key, parseInt(formData[key]));
+        } else if (key === 'weight' && formData[key]) {
+          parcelData.append(key, parseFloat(formData[key]));
+        } else {
+          parcelData.append(key, formData[key]);
+        }
+      });
+      
+      // Add image to FormData if exists
+      if (image) {
+        parcelData.append('image', image);
+      }
+      
+      // API request with FormData
+      const response = await api.post('/api/parcels', parcelData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       toast.success('Parcel created successfully');
       
       // Navigate to parcel detail page
@@ -114,21 +169,21 @@ const NewParcel = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="New Parcel">
+      <DashboardLayout title="New Railway Parcel">
         <LoadingSpinner />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="New Parcel">
+    <DashboardLayout title="New Railway Parcel">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Create New Parcel</h2>
-        <p className="text-gray-600">Fill in the details to create a new parcel</p>
+        <h2 className="text-2xl font-bold text-gray-800">Create New Railway Parcel</h2>
+        <p className="text-gray-600">Fill in the details to create a new parcel for railway transport</p>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Station Information</h3>
@@ -205,6 +260,66 @@ const NewParcel = () => {
                 onChange={handleChange}
                 className="form-input"
               />
+            </div>
+            
+            <div className="col-span-2">
+              <label htmlFor="image" className="form-label">Parcel Image (Optional)</label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div className="space-y-1 text-center">
+                  {imagePreview ? (
+                    <div className="relative mx-auto">
+                      <img 
+                        src={imagePreview} 
+                        alt="Parcel preview" 
+                        className="mx-auto h-64 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <div className="flex text-sm text-gray-600 justify-center">
+                        <label
+                          htmlFor="image"
+                          className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500"
+                        >
+                          <span>Upload a file</span>
+                          <input
+                            id="image"
+                            name="image"
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            ref={fileInputRef}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="col-span-2">

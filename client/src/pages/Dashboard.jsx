@@ -74,7 +74,7 @@ const Dashboard = () => {
     <DashboardLayout title="Dashboard">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800">Welcome, {currentUser?.name}</h2>
-        <p className="text-gray-600">Station: {currentUser?.station?.name}</p>
+        <p className="text-gray-600">Railway Station: {currentUser?.station?.name} ({currentUser?.station?.code})</p>
       </div>
 
       {/* Stats Cards */}

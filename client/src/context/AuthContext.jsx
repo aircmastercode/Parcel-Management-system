@@ -45,10 +45,14 @@ export const AuthProvider = ({ children }) => {
       const contact = email || phone;
       setEmailOrPhone(contact);
       
+      console.log(`Sending OTP to ${contact}`);
+      
       const response = await api.post('/api/auth/send-otp', {
         email,
         phone
       });
+      
+      console.log('OTP send response:', response.data);
       
       setOtpSent(true);
       setExpiryTime(new Date(response.data.expiresAt));
@@ -56,7 +60,9 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error('Error sending OTP:', error);
-      toast.error(error.response?.data?.message || 'Error sending OTP');
+      const errorMessage = error.response?.data?.message || 'Error sending OTP';
+      const errorDetails = error.response?.data?.error || '';
+      toast.error(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
       return false;
     } finally {
       setLoading(false);
@@ -69,8 +75,12 @@ export const AuthProvider = ({ children }) => {
       const payload = emailOrPhone.includes('@')
         ? { email: emailOrPhone, otp }
         : { phone: emailOrPhone, otp };
-        
+      
+      console.log('Verifying OTP with payload:', payload);
+      
       const response = await api.post('/api/auth/verify-otp', payload);
+      
+      console.log('OTP verification response:', response.data);
       
       // Save token and set current user
       const { token, user } = response.data;
@@ -84,7 +94,9 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error('Error verifying OTP:', error);
-      toast.error(error.response?.data?.message || 'Invalid OTP');
+      const errorMessage = error.response?.data?.message || 'Invalid OTP';
+      const errorDetails = error.response?.data?.error || '';
+      toast.error(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
       return false;
     } finally {
       setLoading(false);

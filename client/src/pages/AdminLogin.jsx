@@ -1,88 +1,70 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { toast } from 'react-toastify';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-const Login = () => {
-  const { sendOTP, verifyOTP, loading, otpSent, expiryTime } = useAuth();
+const AdminLogin = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [error, setError] = useState('');
-  const [debug, setDebug] = useState('');
-  const [stations, setStations] = useState([]);
-  
-  const from = location.state?.from?.pathname || '/dashboard';
-  
-  // Fetch stations when component mounts
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const response = await api.get('/api/stations');
-        setStations(response.data);
-      } catch (err) {
-        console.error('Error fetching stations:', err);
-      }
-    };
-    
-    fetchStations();
-  }, []);
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [expiryTime, setExpiryTime] = useState(null);
   
   // Handle email submission
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    setError('');
-    setDebug('');
+    setLoading(true);
     
     if (!email) {
-      setError('Email is required');
+      toast.error('Email is required');
+      setLoading(false);
       return;
     }
     
-    setDebug(`Attempting to send OTP to ${email}...`);
-    
     try {
-      const success = await sendOTP(email);
-      if (!success) {
-        setError('Failed to send OTP. Please try again.');
-        setDebug(`Failed to send OTP to ${email}. Please check if this is a valid email for a railway station user.`);
-      } else {
-        setDebug(`OTP sent successfully to ${email}. Check server console for OTP code.`);
-      }
-    } catch (err) {
-      console.error('Error in handleSendOTP:', err);
-      setError(`Error: ${err.message || 'Unknown error'}`);
+      const response = await api.post('/api/admin/send-otp', { email });
+      setOtpSent(true);
+      setExpiryTime(new Date(response.data.expiresAt));
+      toast.success('OTP sent to your email');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send OTP');
+      console.error('Error sending OTP:', error);
+    } finally {
+      setLoading(false);
     }
   };
   
   // Handle OTP verification
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
-    setError('');
-    setDebug('');
+    setLoading(true);
     
     if (!otp) {
-      setError('OTP is required');
+      toast.error('OTP is required');
+      setLoading(false);
       return;
     }
     
-    setDebug(`Attempting to verify OTP ${otp}...`);
-    
     try {
-      const success = await verifyOTP(otp);
-      if (success) {
-        setDebug('OTP verification successful. Redirecting...');
-        navigate(from, { replace: true });
-      } else {
-        setError('Invalid OTP. Please try again.');
-        setDebug('OTP verification failed. Check the server logs for details.');
-      }
-    } catch (err) {
-      console.error('Error in handleVerifyOTP:', err);
-      setError(`Error: ${err.message || 'Unknown error'}`);
+      const response = await api.post('/api/admin/verify-otp', { email, otp });
+      
+      // Save admin token
+      localStorage.setItem('admin_token', response.data.token);
+      localStorage.setItem('is_admin', 'true');
+      
+      // Set default Authorization header for future API calls
+      api.defaults.headers.common['x-auth-token'] = response.data.token;
+      
+      toast.success('Login successful');
+      navigate('/admin/dashboard');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Invalid OTP');
+      console.error('Error verifying OTP:', error);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -110,45 +92,22 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Railway Parcel Management System
+          Admin Portal
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Login to access your station dashboard
+          Railway Parcel Management System
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
-          
-          {debug && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-              <p className="text-blue-700 text-sm">{debug}</p>
-            </div>
-          )}
-          
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
-            <p className="text-yellow-700 text-sm">
-              <strong>Available Railway Stations:</strong>
-              {stations.map(station => (
-                <div key={station.id} className="mt-1">
-                  <span className="font-semibold">{station.name}</span> ({station.code})
-                </div>
-              ))}
-            </p>
-          </div>
-          
           {loading ? (
             <LoadingSpinner />
           ) : !otpSent ? (
             <form onSubmit={handleSendOTP}>
               <div>
                 <label htmlFor="email" className="form-label">
-                  Email Address
+                  Admin Email Address
                 </label>
                 <input
                   id="email"
@@ -157,7 +116,7 @@ const Login = () => {
                   autoComplete="email"
                   required
                   className="form-input"
-                  placeholder="Enter your email"
+                  placeholder="Enter admin email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -191,9 +150,6 @@ const Login = () => {
                 <p className="mt-2 text-sm text-gray-500">
                   OTP expires in {timeRemaining}
                 </p>
-                <p className="mt-2 text-sm text-blue-600">
-                  Check your email for the OTP code
-                </p>
               </div>
 
               <div className="mt-6">
@@ -217,7 +173,6 @@ const Login = () => {
             </form>
           )}
           
-          {/* Admin Link */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -225,17 +180,18 @@ const Login = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Admin Access
+                  Not an admin?
                 </span>
               </div>
             </div>
-            <div className="mt-4">
+
+            <div className="mt-6">
               <button
                 type="button"
-                onClick={() => navigate('/admin/login')}
-                className="w-full text-center text-sm text-primary-600 hover:text-primary-800"
+                className="w-full btn-outline"
+                onClick={() => navigate('/login')}
               >
-                Login as Administrator
+                Go to Station Login
               </button>
             </div>
           </div>
@@ -245,4 +201,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default AdminLogin; 

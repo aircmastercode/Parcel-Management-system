@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User, Station } = require('../models');
 const jwt = require('jsonwebtoken');
 const { generateOTP, sendOTP, verifyOTP } = require('../utils/otpGenerator');
 
@@ -11,13 +11,26 @@ exports.sendOTP = async (req, res) => {
       return res.status(400).json({ message: 'Email or phone is required' });
     }
     
+    console.log(`Attempting to send OTP to ${email || phone}`);
+    
     // Find user by email or phone
     const query = email ? { email } : { phone };
-    const user = await User.findOne({ where: query });
+    console.log('Looking for user with query:', query);
+    
+    const user = await User.findOne({ 
+      where: query,
+      include: [{
+        model: Station,
+        as: 'station'
+      }]
+    });
     
     if (!user) {
+      console.log(`User not found for ${email || phone}`);
       return res.status(404).json({ message: 'User not found' });
     }
+    
+    console.log(`User found: ${user.name}, Station: ${user.station?.name || 'Unknown'}`);
     
     // Generate OTP
     const otp = generateOTP(6);
@@ -33,13 +46,15 @@ exports.sendOTP = async (req, res) => {
     const recipient = email || phone;
     await sendOTP(recipient, otp);
     
+    console.log(`OTP sent successfully to ${recipient}`);
+    
     res.status(200).json({
       message: `OTP sent to ${email ? 'email' : 'phone'}`,
       expiresAt: expiryTime
     });
   } catch (error) {
     console.error('Error sending OTP:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -56,6 +71,8 @@ exports.verifyOTP = async (req, res) => {
       return res.status(400).json({ message: 'Email or phone is required' });
     }
     
+    console.log(`Attempting to verify OTP for ${email || phone}`);
+    
     // Find user by email or phone
     const query = email ? { email } : { phone };
     const user = await User.findOne({ 
@@ -64,14 +81,33 @@ exports.verifyOTP = async (req, res) => {
     });
     
     if (!user) {
+      console.log(`User not found for ${email || phone}`);
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Verify OTP
-    const isValidOTP = verifyOTP(user.last_otp, otp, user.otp_expires_at);
+    console.log(`User found: ${user.name}, Stored OTP: ${user.last_otp}, Provided OTP: ${otp}`);
     
-    if (!isValidOTP) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    // Check if OTP is not set
+    if (!user.last_otp) {
+      console.log('No OTP has been set for this user');
+      return res.status(400).json({ message: 'No OTP has been requested. Please request a new OTP.' });
+    }
+    
+    // Check if OTP has expired
+    const now = new Date();
+    const expiryTime = new Date(user.otp_expires_at);
+    
+    console.log(`Current time: ${now}, OTP expiry time: ${expiryTime}`);
+    
+    if (now > expiryTime) {
+      console.log('OTP has expired');
+      return res.status(400).json({ message: 'OTP has expired. Please request a new OTP.' });
+    }
+    
+    // Compare OTPs
+    if (user.last_otp !== otp) {
+      console.log('Invalid OTP provided');
+      return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
     }
     
     // Clear the OTP after successful verification
@@ -93,6 +129,8 @@ exports.verifyOTP = async (req, res) => {
       { expiresIn: '24h' }
     );
     
+    console.log(`Login successful for ${user.name}`);
+    
     res.status(200).json({
       message: 'Login successful',
       token,
@@ -112,6 +150,6 @@ exports.verifyOTP = async (req, res) => {
     });
   } catch (error) {
     console.error('Error verifying OTP:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 }; 
