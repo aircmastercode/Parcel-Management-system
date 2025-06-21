@@ -32,11 +32,13 @@ exports.authenticate = async (req, res, next) => {
 
 exports.adminAuth = async (req, res, next) => {
   try {
+    console.log('Admin token verification started');
     // Get token from header
     const token = req.header('x-auth-token');
     
     // Check if no token
     if (!token) {
+      console.log('No token provided');
       return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
@@ -45,6 +47,7 @@ exports.adminAuth = async (req, res, next) => {
     
     // Check if token has admin flag
     if (!decoded.isAdmin) {
+      console.log('Token does not have admin privileges');
       return res.status(403).json({ message: 'Not authorized as admin' });
     }
     
@@ -54,9 +57,11 @@ exports.adminAuth = async (req, res, next) => {
     });
     
     if (!admin) {
+      console.log('Admin not found for token');
       return res.status(401).json({ message: 'Token is not valid' });
     }
     
+    console.log('Admin verified:', admin.username);
     req.admin = admin;
     next();
   } catch (err) {

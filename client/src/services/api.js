@@ -10,9 +10,14 @@ const api = axios.create({
 // Add a request interceptor
 api.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['x-auth-token'] = token;
+    // Check for admin token first, then regular user token
+    const adminToken = localStorage.getItem('admin_token');
+    const userToken = localStorage.getItem('token');
+    
+    if (adminToken) {
+      config.headers['x-auth-token'] = adminToken;
+    } else if (userToken) {
+      config.headers['x-auth-token'] = userToken;
     }
     return config;
   },

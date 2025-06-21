@@ -137,19 +137,24 @@ The system is configured with the following railway stations:
 
 In this system:
 1. Each user is assigned to a specific railway station
-2. The master station (NEW DELHI) can see all parcels and messages across all stations
+2. Admin section 
 3. Other stations can see:
    - Their own parcels (sent or received)
    - All messages for system-wide transparency
+
+## Admin Access
+
+To access the admin section, use the following credentials:
+
+- **Email**: admin@example.com
+- **Role**: admin
+
+Use this email to log in and manage users and stations.
 
 ## Authentication
 
 To login, use an email address associated with a railway station user. The system uses OTP-based authentication. In development mode, the OTP code is displayed in the server console logs.
 
-Example console output:
-```
-MOCK OTP SERVICE: OTP 123456 sent to test@example.com
-```
 
 ## API Endpoints
 

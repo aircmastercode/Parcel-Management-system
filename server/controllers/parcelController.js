@@ -160,8 +160,8 @@ exports.uploadParcelImage = async (req, res) => {
 // Create a new parcel
 exports.createParcel = async (req, res) => {
   try {
+    const sender_station_id = req.user.station_id; // Automatically set sender station from user's station
     const {
-      sender_station_id,
       receiver_station_id,
       weight,
       description,
@@ -173,9 +173,9 @@ exports.createParcel = async (req, res) => {
     } = req.body;
     
     // Check if required fields are provided
-    if (!sender_station_id || !receiver_station_id || !sender_name || !receiver_name || !initial_message) {
+    if (!receiver_station_id || !sender_name || !receiver_name || !initial_message) {
       return res.status(400).json({ 
-        message: 'Missing required fields: sender_station_id, receiver_station_id, sender_name, receiver_name, and initial_message are required' 
+        message: 'Missing required fields: receiver_station_id, sender_name, receiver_name, and initial_message are required' 
       });
     }
     
@@ -231,48 +231,26 @@ exports.createParcel = async (req, res) => {
       await newParcel.save();
     }
     
-    // Create an initial message from sender to receiver
-    await Message.create({
-      from_station: sender_station_id,
-      to_station: receiver_station_id,
-      parcel_id: newParcel.id,
-      content: initial_message,
-      read: false,
-      is_master_copied: true
-    });
-    
-    // Get master station
-    const masterStation = await Station.findOne({
-      where: { is_master: true }
-    });
-    
-    // If sender or receiver is not master station, send a copy to master
-    if (masterStation && 
-        masterStation.id !== sender_station_id && 
-        masterStation.id !== receiver_station_id) {
+    // Create messages for all stations
+    const stations = await Station.findAll();
+    for (const station of stations) {
+      let content;
+      if (station.id === sender_station_id) {
+        // For the sender's station, include the sender's name
+        content = `Parcel sent by ${sender_name} from ${senderStation.name}`;
+      } else {
+        // For other stations, only include the sending station's name
+        content = `Parcel sent from ${senderStation.name}`;
+      }
       await Message.create({
         from_station: sender_station_id,
-        to_station: masterStation.id,
+        to_station: station.id,
         parcel_id: newParcel.id,
-        content: `New parcel created with tracking number ${tracking_number}. Initial message: ${initial_message}`,
+        content,
         read: false,
-        is_master_copied: true
+        is_master_copied: station.is_master
       });
     }
-    
-    // Get all stations other than sender, receiver, and master
-    const allStations = await Station.findAll({
-      where: {
-        id: {
-          [require('../models').Sequelize.Op.notIn]: [
-            sender_station_id,
-            receiver_station_id,
-            masterStation ? masterStation.id : 0
-          ]
-        },
-        is_master: false
-      }
-    });
     
     // Get the created parcel with relations
     const parcelWithRelations = await Parcel.findByPk(newParcel.id, {
