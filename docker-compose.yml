@@ -3,7 +3,7 @@ version: '3'
 services:
   # Backend service
   server:
-    image: node:16
+    image: node:18
     container_name: parcel-management-server
     working_dir: /app
     command: >
@@ -28,7 +28,7 @@ services:
 
   # Frontend service
   client:
-    image: node:16
+    image: node:18
     container_name: parcel-management-client
     working_dir: /app
     command: >
