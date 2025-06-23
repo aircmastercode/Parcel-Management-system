@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User, Admin } = require('../models');
+const { User, Admin, Station } = require('../models');
 
 exports.authenticate = async (req, res, next) => {
   try {
@@ -14,8 +14,12 @@ exports.authenticate = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_jwt_secret');
     
-    // Add user from payload
+    // Add user from payload with station information
     const user = await User.findByPk(decoded.id, {
+      include: [{
+        model: Station,
+        as: 'station'
+      }],
       attributes: { exclude: ['last_otp', 'otp_expires_at'] }
     });
     
@@ -83,4 +87,4 @@ exports.isMaster = async (req, res, next) => {
   } catch (err) {
     res.status(500).json({ message: 'Server Error' });
   }
-}; 
+};

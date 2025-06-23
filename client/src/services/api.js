@@ -36,8 +36,9 @@ api.interceptors.response.use(
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       if (error.response.status === 401) {
-        // If unauthorized, clear token and redirect to login
+        // If unauthorized, clear tokens
         localStorage.removeItem('token');
+        localStorage.removeItem('admin_token');
       }
     }
     return Promise.reject(error);
