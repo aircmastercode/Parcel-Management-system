@@ -15,9 +15,10 @@ A full-stack application for managing parcels between different railway stations
 
 - **Frontend**: React with Vite, styled with Tailwind CSS
 - **Backend**: Express.js (Node.js)
-- **Database**: MySQL with Sequelize ORM (can also use SQLite)
+- **Database**: SQLite with Sequelize ORM
 - **Authentication**: OTP-based with JWT for session management
 - **File Storage**: Local file storage for parcel images
+- **Docker**: Containerized setup for easy deployment
 
 ## Project Structure
 
@@ -48,24 +49,56 @@ A full-stack application for managing parcels between different railway stations
 │   ├── server.js        # Server entry point
 │   └── package.json     # Backend dependencies
 │
+├── docker-compose.yml   # Docker Compose configuration
 ├── .env                 # Environment variables (create from config.env.example)
 └── README.md            # Project documentation
 ```
 
-## Setup Instructions
+## Docker Setup
+
+The easiest way to run this application is with Docker:
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your machine
+
+### Running with Docker
+
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   git clone <repository-url>
+   cd railway-parcel-management-system
+   ```
+
+2. Create a `.env` file in the server directory:
+   ```bash
+   cp server/config.env.example server/.env
+   ```
+
+3. Build and start the Docker containers:
+   ```bash
+   docker-compose up --build
+   ```
+
+4. Access the application at:
+   ```
+   Frontend: http://localhost:3000
+   Backend API: http://localhost:8000
+   ```
+
+5. To stop the application:
+   ```bash
+   docker-compose down
+   ```
+
+All data will be stored in a persistent Docker volume, ensuring your data is preserved across container restarts.
+
+## Standard Setup Instructions
 
 ### Prerequisites
 
 - Node.js (v14 or later)
-- MySQL (v8 or later) or SQLite
 - npm or yarn
-
-### Database Setup
-
-1. Create a MySQL database named `parcel_management`:
-   ```sql
-   CREATE DATABASE parcel_management;
-   ```
 
 ### Installation
 
@@ -82,7 +115,7 @@ A full-stack application for managing parcels between different railway stations
    cp config.env.example .env
    ```
 
-3. Update the `.env` file with your database credentials.
+3. Update the `.env` file with your configuration.
 
 ### Running the System
 

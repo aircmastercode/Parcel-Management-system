@@ -7,10 +7,15 @@ const env = process.env.NODE_ENV || 'development';
 
 const db = {};
 
+// Define database path - check for Docker environment first
+const dbPath = fs.existsSync('/app/data') 
+  ? path.join('/app/data', 'database.sqlite')
+  : path.join(__dirname, '../database.sqlite');
+
 // Use SQLite instead of MySQL
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: path.join(__dirname, '../database.sqlite'),
+  storage: dbPath,
   logging: console.log
 });
 
