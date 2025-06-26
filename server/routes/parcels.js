@@ -3,6 +3,11 @@ const router = express.Router();
 const parcelController = require('../controllers/parcelController');
 const { authenticate, isMaster } = require('../middlewares/auth');
 
+// @route   GET /api/parcels/track/:trackingNumber
+// @desc    Public parcel tracking (no authentication required)
+// @access  Public
+router.get('/track/:trackingNumber', parcelController.trackParcel);
+
 // @route   GET /api/parcels
 // @desc    Get all parcels
 // @access  Private/Admin

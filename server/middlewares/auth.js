@@ -24,12 +24,18 @@ exports.authenticate = async (req, res, next) => {
     });
     
     if (!user) {
-      return res.status(401).json({ message: 'Token is not valid' });
+      return res.status(401).json({ message: 'User not found. Your account may have been deleted.' });
+    }
+    
+    // Check if the user's station still exists
+    if (!user.station) {
+      return res.status(403).json({ message: 'Your account is not associated with any station. Please contact an administrator.' });
     }
     
     req.user = user;
     next();
   } catch (err) {
+    console.error('Authentication error:', err.message);
     res.status(401).json({ message: 'Token is not valid' });
   }
 };

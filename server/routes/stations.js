@@ -5,8 +5,8 @@ const { authenticate, isMaster } = require('../middlewares/auth');
 
 // @route   GET /api/stations
 // @desc    Get all stations
-// @access  Private
-router.get('/', authenticate, stationController.getStations);
+// @access  Public (needed for login page)
+router.get('/', stationController.getStations);
 
 // @route   GET /api/stations/:id
 // @desc    Get station by ID

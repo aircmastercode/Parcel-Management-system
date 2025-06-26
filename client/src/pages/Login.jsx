@@ -3,240 +3,377 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import api from '../services/api';
+import { toast } from 'react-toastify';
+import { FaTrain, FaEnvelope, FaShieldAlt, FaClock, FaArrowLeft, FaBuilding, FaMapMarkerAlt, FaPhone, FaRedo } from 'react-icons/fa';
 
 const Login = () => {
-  const { sendOTP, verifyOTP, loading, otpSent, expiryTime } = useAuth();
+  const { sendOTP, verifyOTP, loading, otpSent, expiryTime, setOtpSent, setExpiryTime, setEmailOrPhone, clearAuthData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
-  const [debug, setDebug] = useState('');
   const [stations, setStations] = useState([]);
-  
-  const from = location.state?.from?.pathname || '/dashboard';
-  
-  // Fetch stations when component mounts
+  const [selectedStation, setSelectedStation] = useState('');
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [stationsLoading, setStationsLoading] = useState(true);
+  const [stationsError, setStationsError] = useState('');
+
   useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const response = await api.get('/api/stations');
-        setStations(response.data);
-      } catch (err) {
-        console.error('Error fetching stations:', err);
-      }
-    };
-    
-    fetchStations();
+    loadStations();
   }, []);
-  
-  // Handle email submission
+
+  useEffect(() => {
+    if (expiryTime) {
+      const interval = setInterval(() => {
+        const now = new Date().getTime();
+        const expiry = new Date(expiryTime).getTime();
+        const timeLeft = Math.max(0, Math.floor((expiry - now) / 1000));
+        
+        setTimeLeft(timeLeft);
+        
+        if (timeLeft === 0) {
+          setOtpSent(false);
+          setExpiryTime(null);
+          clearInterval(interval);
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [expiryTime, setOtpSent, setExpiryTime]);
+
+  const loadStations = async () => {
+    try {
+      setStationsLoading(true);
+      setStationsError('');
+      
+      const response = await api.get('/api/stations');
+      
+      if (response.data && response.data.length > 0) {
+        setStations(response.data);
+      } else {
+        setStationsError('No stations available');
+        toast.error('No railway stations found. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error loading stations:', error);
+      setStationsError('Failed to load stations');
+      
+      if (error.response?.status === 401) {
+        // This shouldn't happen for public endpoint, but handle it
+        setStationsError('Authentication error. Please clear your session and try again.');
+      } else {
+        toast.error('Failed to load railway stations. Please try again.');
+      }
+    } finally {
+      setStationsLoading(false);
+    }
+  };
+
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setError('');
-    setDebug('');
     
-    if (!email) {
-      setError('Email is required');
+    if (!email.trim()) {
+      setError('Please enter your email address');
       return;
     }
     
-    setDebug(`Attempting to send OTP to ${email}...`);
+    if (!selectedStation) {
+      setError('Please select your railway station');
+      return;
+    }
     
-    try {
-      const success = await sendOTP(email);
-      if (!success) {
-        setError('Failed to send OTP. Please try again.');
-        setDebug(`Failed to send OTP to ${email}. Please check if this is a valid email for a railway station user.`);
-      } else {
-        setDebug(`OTP sent successfully to ${email}. Check server console for OTP code.`);
-      }
-    } catch (err) {
-      console.error('Error in handleSendOTP:', err);
-      setError(`Error: ${err.message || 'Unknown error'}`);
+    const station = stations.find(s => s.id === parseInt(selectedStation));
+    if (!station) {
+      setError('Invalid station selected');
+      return;
+    }
+    
+    const success = await sendOTP(email.trim(), null, station.code);
+    if (success) {
+      setError('');
+    } else {
+      setError('Failed to send OTP. Please check your email and station selection.');
     }
   };
-  
-  // Handle OTP verification
+
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     setError('');
-    setDebug('');
     
-    if (!otp) {
-      setError('OTP is required');
+    if (!otp.trim()) {
+      setError('Please enter the OTP');
       return;
     }
     
-    setDebug(`Attempting to verify OTP ${otp}...`);
-    
-    try {
-      const success = await verifyOTP(otp);
-      if (success) {
-        setDebug('OTP verification successful. Redirecting...');
-        navigate(from, { replace: true });
-      } else {
-        setError('Invalid OTP. Please try again.');
-        setDebug('OTP verification failed. Check the server logs for details.');
-      }
-    } catch (err) {
-      console.error('Error in handleVerifyOTP:', err);
-      setError(`Error: ${err.message || 'Unknown error'}`);
+    const success = await verifyOTP(otp.trim());
+    if (success) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } else {
+      setError('Invalid OTP. Please try again.');
+      setOtp(''); // Clear the OTP field
     }
   };
-  
-  // Calculate remaining time
-  const calculateTimeRemaining = () => {
-    if (!expiryTime) return { minutes: 0, seconds: 0 };
-    
-    const now = new Date();
-    const expiry = new Date(expiryTime);
-    const diffMs = expiry - now;
-    
-    if (diffMs <= 0) return { minutes: 0, seconds: 0 };
-    
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const minutes = Math.floor(diffSeconds / 60);
-    const seconds = diffSeconds % 60;
-    
-    return { minutes, seconds };
+
+  const handleClearSession = () => {
+    clearAuthData();
+    setError('');
+    setEmail('');
+    setOtp('');
+    setSelectedStation('');
+    setOtpSent(false);
+    setExpiryTime(null);
+    loadStations(); // Reload stations
+    toast.info('Session cleared. Please try logging in again.');
   };
-  
-  const { minutes, seconds } = calculateTimeRemaining();
-  const timeRemaining = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleResendOTP = async () => {
+    if (!email || !selectedStation) return;
+    
+    const station = stations.find(s => s.id === parseInt(selectedStation));
+    if (station) {
+      await sendOTP(email, null, station.code);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Railway Parcel Management System
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Login to access your station dashboard
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
-          
-          {debug && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-              <p className="text-blue-700 text-sm">{debug}</p>
-            </div>
-          )}
-          
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
-            <p className="text-yellow-700 text-sm">
-              <strong>Available Railway Stations:</strong>
-              {stations.map(station => (
-                <div key={station.id} className="mt-1">
-                  <span className="font-semibold">{station.name}</span> ({station.code})
-                </div>
-              ))}
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <div className="mx-auto w-20 h-20 gradient-railway rounded-3xl flex items-center justify-center shadow-2xl mb-6 animate-bounce-in">
+            <FaTrain className="w-10 h-10 text-white" />
           </div>
-          
-          {loading ? (
-            <LoadingSpinner />
-          ) : !otpSent ? (
-            <form onSubmit={handleSendOTP}>
-              <div>
-                <label htmlFor="email" className="form-label">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="form-input"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+          <h2 className="heading-primary text-gradient">Railway Parcel Management</h2>
+          <p className="mt-2 text-slate-600 font-medium">
+            {otpSent ? 'Enter verification code' : 'Sign in to your station account'}
+          </p>
+        </div>
 
-              <div className="mt-6">
-                <button
-                  type="submit"
-                  className="w-full btn-primary"
-                >
-                  Send OTP
-                </button>
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 animate-slide-down">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FaShieldAlt className="h-5 w-5 text-red-400" />
               </div>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOTP}>
-              <div>
-                <label htmlFor="otp" className="form-label">
-                  One-Time Password
-                </label>
-                <input
-                  id="otp"
-                  name="otp"
-                  type="text"
-                  required
-                  className="form-input"
-                  placeholder="Enter the OTP sent to your email"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-                <p className="mt-2 text-sm text-gray-500">
-                  OTP expires in {timeRemaining}
-                </p>
-                <p className="mt-2 text-sm text-blue-600">
-                  Check your email for the OTP code
-                </p>
-              </div>
-
-              <div className="mt-6">
-                <button
-                  type="submit"
-                  className="w-full btn-primary"
-                >
-                  Verify OTP
-                </button>
-              </div>
-              
-              <div className="mt-4">
-                <button
-                  type="button"
-                  className="w-full btn-outline"
-                  onClick={handleSendOTP}
-                >
-                  Resend OTP
-                </button>
-              </div>
-            </form>
-          )}
-          
-          {/* Admin Link */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Admin Access
-                </span>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">{error}</p>
               </div>
             </div>
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => navigate('/admin/login')}
-                className="w-full text-center text-sm text-primary-600 hover:text-primary-800"
-              >
-                Login as Administrator
-              </button>
+            {stationsError && (
+              <div className="mt-3 pt-3 border-t border-red-200">
+                <button
+                  onClick={handleClearSession}
+                  className="btn-outline text-red-600 border-red-300 hover:bg-red-50 text-sm"
+                >
+                  <FaRedo className="w-4 h-4 mr-2" />
+                  Clear Session & Retry
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Main Form */}
+        <div className="card-elevated animate-slide-up">
+          <div className="card-body">
+            {!otpSent ? (
+              <form className="space-y-6" onSubmit={handleSendOTP}>
+                <div>
+                  <label htmlFor="email" className="form-label flex items-center">
+                    <FaEnvelope className="w-4 h-4 mr-2 text-blue-600" />
+                    Email Address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    className="form-input"
+                    placeholder="Enter your station email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="station" className="form-label flex items-center">
+                    <FaBuilding className="w-4 h-4 mr-2 text-green-600" />
+                    Railway Station
+                  </label>
+                  
+                  {stationsLoading ? (
+                    <div className="form-input flex items-center justify-center py-4">
+                      <LoadingSpinner size="small" />
+                      <span className="ml-2 text-slate-500">Loading stations...</span>
+                    </div>
+                  ) : stationsError ? (
+                    <div className="form-input bg-red-50 border-red-200 text-red-700 flex items-center">
+                      <FaShieldAlt className="w-4 h-4 mr-2" />
+                      {stationsError}
+                    </div>
+                  ) : (
+                    <select
+                      id="station"
+                      name="station"
+                      required
+                      className="form-input"
+                      value={selectedStation}
+                      onChange={(e) => setSelectedStation(e.target.value)}
+                      disabled={loading}
+                    >
+                      <option value="">Select your station</option>
+                      {stations.map((station) => (
+                        <option key={station.id} value={station.id}>
+                          {station.name} ({station.code})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  
+                  {stations.length > 0 && (
+                    <div className="mt-2 text-xs text-slate-500 flex items-center">
+                      <FaMapMarkerAlt className="w-3 h-3 mr-1" />
+                      {stations.length} railway stations available
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || stationsLoading || stationsError}
+                  className="btn-primary w-full py-3 text-base font-semibold"
+                >
+                  {loading ? (
+                    <>
+                      <LoadingSpinner size="small" />
+                      <span className="ml-2">Sending OTP...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaEnvelope className="w-5 h-5 mr-2" />
+                      Send Verification Code
+                    </>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form className="space-y-6" onSubmit={handleVerifyOTP}>
+                <div className="text-center">
+                  <div className="w-16 h-16 gradient-railway-success rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <FaEnvelope className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-slate-700 font-medium">
+                    We've sent a verification code to
+                  </p>
+                  <p className="text-blue-600 font-bold">{email}</p>
+                </div>
+
+                <div>
+                  <label htmlFor="otp" className="form-label flex items-center justify-center">
+                    <FaShieldAlt className="w-4 h-4 mr-2 text-green-600" />
+                    Verification Code
+                  </label>
+                  <input
+                    id="otp"
+                    name="otp"
+                    type="text"
+                    required
+                    maxLength="6"
+                    className="form-input text-center text-2xl font-bold tracking-widest"
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    disabled={loading}
+                    autoComplete="one-time-code"
+                  />
+                </div>
+
+                {timeLeft > 0 && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                      <FaClock className="w-4 h-4 text-amber-600 mr-2" />
+                      <span className="text-amber-700 font-medium">
+                        Code expires in {formatTime(timeLeft)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <button
+                    type="submit"
+                    disabled={loading || otp.length !== 6}
+                    className="btn-primary w-full py-3 text-base font-semibold"
+                  >
+                    {loading ? (
+                      <>
+                        <LoadingSpinner size="small" />
+                        <span className="ml-2">Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaShieldAlt className="w-5 h-5 mr-2" />
+                        Verify & Sign In
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={handleResendOTP}
+                      disabled={loading || timeLeft > 0}
+                      className="btn-outline flex-1"
+                    >
+                      <FaRedo className="w-4 h-4 mr-2" />
+                      Resend Code
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtpSent(false);
+                        setOtp('');
+                        setError('');
+                      }}
+                      className="btn-ghost flex-1"
+                    >
+                      <FaArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
+          <p className="text-sm text-slate-500">
+            Need help? Contact your station administrator
+          </p>
+          <div className="mt-4 flex items-center justify-center space-x-4 text-xs text-slate-400">
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              System Online
+            </div>
+            <div className="flex items-center">
+              <FaShieldAlt className="w-3 h-3 mr-1" />
+              Secure Login
             </div>
           </div>
         </div>

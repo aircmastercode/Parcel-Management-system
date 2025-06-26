@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaBars, FaTimes, FaHome, FaBox, FaEnvelope, FaSignOutAlt, FaUser, FaBuilding } from 'react-icons/fa';
+import NotificationSystem from './NotificationSystem';
+import { 
+  FaBars, 
+  FaTimes, 
+  FaHome, 
+  FaBox, 
+  FaEnvelope, 
+  FaSignOutAlt, 
+  FaUser, 
+  FaBuilding, 
+  FaChartBar,
+  FaCog,
+  FaBell,
+  FaSearch,
+  FaTrain
+} from 'react-icons/fa';
 
 const DashboardLayout = ({ children, title }) => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const handleLogout = () => {
-    logout();
+    logout(true); // Show success message for manual logout
     navigate('/login');
   };
 
@@ -17,57 +34,100 @@ const DashboardLayout = ({ children, title }) => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  const navigationItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: FaHome },
+    { name: 'Parcels', path: '/parcels', icon: FaBox },
+    { name: 'Messages', path: '/messages', icon: FaEnvelope },
+    ...(currentUser?.role === 'master' ? [{ name: 'Master View', path: '/master-dashboard', icon: FaBuilding }] : [])
+  ];
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar for mobile */}
-      <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={toggleSidebar}></div>
-        
-        <div className="fixed inset-y-0 left-0 flex flex-col w-64 max-w-xs bg-primary-800 shadow-xl">
-          <div className="flex items-center justify-between h-16 px-6 bg-primary-900">
-            <span className="text-xl font-semibold text-white">PMS</span>
-            <button className="text-white" onClick={toggleSidebar}>
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleSidebar}></div>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full shadow-2xl border-r border-white/10" style={{
+          background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+          backdropFilter: 'blur(20px)'
+        }}>
+          {/* Sidebar header */}
+          <div className="flex items-center justify-between h-20 px-6 border-b border-white/10">
+            <div className="flex items-center">
+              <div className="w-10 h-10 gradient-railway rounded-xl flex items-center justify-center mr-3 shadow-lg">
+                <FaTrain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span className="text-xl font-bold text-white drop-shadow-sm">Railway PMS</span>
+                <p className="text-xs text-blue-100 drop-shadow-sm">Management System</p>
+              </div>
+            </div>
+            <button className="lg:hidden text-white hover:text-blue-200 transition-colors" onClick={toggleSidebar}>
               <FaTimes className="w-6 h-6" />
             </button>
           </div>
           
-          {/* Sidebar content */}
-          <div className="flex-1 overflow-y-auto">
-            <SidebarContent currentUser={currentUser} />
+          {/* User info */}
+          <div className="px-6 py-6 border-b border-white/10">
+            <div className="flex items-center">
+              <div className="w-12 h-12 gradient-railway-success rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <FaUser className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold truncate drop-shadow-sm">{currentUser?.name || 'Loading...'}</p>
+                <p className="text-blue-100 text-sm truncate drop-shadow-sm">{currentUser?.station?.name || 'Loading station...'}</p>
+                <div className="flex items-center mt-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse shadow-lg"></div>
+                  <span className="text-xs text-green-200 drop-shadow-sm font-medium">Online</span>
+                </div>
+              </div>
+            </div>
           </div>
+          
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 group ${
+                    active
+                      ? 'bg-white/25 text-white shadow-xl backdrop-blur-sm border border-white/30 font-semibold'
+                      : 'text-blue-50 hover:bg-white/15 hover:text-white hover:shadow-lg hover:font-medium'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Icon className={`w-5 h-5 mr-3 transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-110'}`} />
+                  <span className="truncate">{item.name}</span>
+                  {active && (
+                    <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
           
           {/* Logout button */}
-          <div className="p-4 border-t border-primary-700">
+          <div className="p-4 border-t border-white/10">
             <button
-              className="flex items-center w-full px-4 py-2 text-white rounded-md hover:bg-primary-700"
+              className="flex items-center w-full px-4 py-3 text-blue-50 hover:text-white hover:bg-white/15 rounded-2xl transition-all duration-200 group hover:font-medium"
               onClick={handleLogout}
             >
-              <FaSignOutAlt className="mr-3" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Static sidebar for desktop */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-primary-800">
-          <div className="flex items-center h-16 px-6 bg-primary-900">
-            <span className="text-xl font-semibold text-white">PMS</span>
-          </div>
-          
-          {/* Sidebar content */}
-          <div className="flex-1 overflow-y-auto">
-            <SidebarContent currentUser={currentUser} />
-          </div>
-          
-          {/* Logout button */}
-          <div className="p-4 border-t border-primary-700">
-            <button
-              className="flex items-center w-full px-4 py-2 text-white rounded-md hover:bg-primary-700"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt className="mr-3" />
+              <FaSignOutAlt className="w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-110" />
               <span>Logout</span>
             </button>
           </div>
@@ -75,25 +135,49 @@ const DashboardLayout = ({ children, title }) => {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top navigation */}
-        <header className="bg-white shadow-sm">
+        <header className="bg-white/80 backdrop-blur-lg shadow-lg border-b border-slate-200/50">
           <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center">
-              <button className="lg:hidden text-gray-500 focus:outline-none" onClick={toggleSidebar}>
-                <FaBars className="w-6 h-6" />
+              <button 
+                className="lg:hidden text-slate-500 hover:text-slate-700 focus:outline-none mr-4 p-2 rounded-xl hover:bg-slate-100 transition-colors" 
+                onClick={toggleSidebar}
+              >
+                <FaBars className="w-5 h-5" />
               </button>
-              <h1 className="ml-3 text-xl font-semibold text-gray-800">{title}</h1>
+              <h1 className="heading-primary text-gradient">
+                {title}
+              </h1>
             </div>
             
-            <div className="flex items-center">
-              <div className="relative ml-3">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-gray-700 mr-2">
-                    {currentUser?.name}
-                  </span>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-600 text-white">
-                    {currentUser?.name?.charAt(0).toUpperCase() || <FaUser />}
+            <div className="flex items-center space-x-4">
+              {/* Search bar */}
+              <div className="relative hidden md:block">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="h-4 w-4 text-slate-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search parcels, messages..."
+                  className="block w-64 pl-10 pr-3 py-2.5 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm transition-all duration-200 hover:bg-white focus:bg-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              {/* Notifications */}
+              <NotificationSystem />
+              
+              {/* User menu */}
+              <div className="relative">
+                <div className="flex items-center bg-white/70 backdrop-blur-sm rounded-2xl p-2 border border-slate-200/50 hover:bg-white transition-all duration-200">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-railway text-white font-bold shadow-lg">
+                    {currentUser?.name?.charAt(0).toUpperCase() || <FaUser className="w-5 h-5" />}
+                  </div>
+                  <div className="ml-3 hidden md:block">
+                    <p className="text-sm font-semibold text-slate-700">{currentUser?.name || 'Loading...'}</p>
+                    <p className="text-xs text-slate-500">{currentUser?.station?.code || 'Loading...'}</p>
                   </div>
                 </div>
               </div>
@@ -102,65 +186,15 @@ const DashboardLayout = ({ children, title }) => {
         </header>
 
         {/* Main content area */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          {children}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container-responsive py-8">
+            <div className="animate-fade-in">
+              {children}
+            </div>
+          </div>
         </main>
       </div>
     </div>
-  );
-};
-
-// Sidebar content component
-const SidebarContent = ({ currentUser }) => {
-  const isMaster = currentUser?.role === 'master';
-  
-  return (
-    <nav className="mt-5 px-4">
-      <Link 
-        to="/dashboard"
-        className="flex items-center px-4 py-2 text-white rounded-md hover:bg-primary-700"
-      >
-        <FaHome className="mr-3" />
-        <span>Dashboard</span>
-      </Link>
-      
-      <Link 
-        to="/parcels"
-        className="flex items-center px-4 py-2 mt-2 text-white rounded-md hover:bg-primary-700"
-      >
-        <FaBox className="mr-3" />
-        <span>Parcels</span>
-      </Link>
-      
-      <Link 
-        to="/messages"
-        className="flex items-center px-4 py-2 mt-2 text-white rounded-md hover:bg-primary-700"
-      >
-        <FaEnvelope className="mr-3" />
-        <span>Messages</span>
-      </Link>
-      
-      {isMaster && (
-        <Link 
-          to="/master-dashboard"
-          className="flex items-center px-4 py-2 mt-2 text-white rounded-md hover:bg-primary-700"
-        >
-          <FaBuilding className="mr-3" />
-          <span>Master View</span>
-        </Link>
-      )}
-      
-      <div className="mt-8">
-        <h3 className="px-3 text-xs font-semibold text-white uppercase tracking-wider">
-          Railway Station Information
-        </h3>
-        <div className="mt-2 px-3 py-2 text-white bg-primary-700 rounded-md">
-          <p className="text-sm font-medium">{currentUser?.station?.name}</p>
-          <p className="text-xs mt-1">Station Code: {currentUser?.station?.code}</p>
-          <p className="text-xs mt-1">User ID: {currentUser?.name}</p>
-        </div>
-      </div>
-    </nav>
   );
 };
 

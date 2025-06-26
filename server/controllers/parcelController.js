@@ -3,6 +3,54 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
 
+// Public parcel tracking (no authentication required)
+exports.trackParcel = async (req, res) => {
+  try {
+    const { trackingNumber } = req.params;
+    
+    const parcel = await Parcel.findOne({
+      where: { tracking_number: trackingNumber },
+      include: [
+        {
+          model: Station,
+          as: 'senderStation',
+          attributes: ['id', 'name', 'code', 'location']
+        },
+        {
+          model: Station,
+          as: 'receiverStation',
+          attributes: ['id', 'name', 'code', 'location']
+        }
+      ],
+      attributes: { exclude: ['sender_station_id', 'receiver_station_id'] }
+    });
+    
+    if (!parcel) {
+      return res.status(404).json({ message: 'Parcel not found' });
+    }
+    
+    // Return limited information for public tracking
+    res.status(200).json({
+      tracking_number: parcel.tracking_number,
+      status: parcel.status,
+      weight: parcel.weight,
+      description: parcel.description,
+      sender_name: parcel.sender_name,
+      receiver_name: parcel.receiver_name,
+      sender_contact: parcel.sender_contact,
+      receiver_contact: parcel.receiver_contact,
+      createdAt: parcel.createdAt,
+      updatedAt: parcel.updatedAt,
+      senderStation: parcel.senderStation,
+      receiverStation: parcel.receiverStation,
+      image_url: parcel.image_url
+    });
+  } catch (error) {
+    console.error('Error tracking parcel:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Get all parcels
 exports.getParcels = async (req, res) => {
   try {

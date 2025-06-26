@@ -5,6 +5,29 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { toast } from 'react-toastify';
+import { generateQRCodeDataURL, generateTrackingURL, downloadQRCode } from '../utils/qrGenerator';
+import { 
+  FaBox, 
+  FaClock, 
+  FaTruck, 
+  FaCheckCircle, 
+  FaExclamationTriangle,
+  FaArrowDown,
+  FaCamera,
+  FaUpload,
+  FaTimes,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaUser,
+  FaPhone,
+  FaWeightHanging,
+  FaCalendar,
+  FaEdit,
+  FaHistory,
+  FaQrcode,
+  FaDownload,
+  FaShare
+} from 'react-icons/fa';
 
 const ParcelDetail = () => {
   const { id } = useParams();
@@ -20,10 +43,13 @@ const ParcelDetail = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [stations, setStations] = useState([]);
+  const [showQRCode, setShowQRCode] = useState(false);
   const fileInputRef = useRef(null);
   
   useEffect(() => {
     loadParcelData();
+    loadStations();
   }, [id]);
   
   const loadParcelData = async () => {
@@ -51,6 +77,15 @@ const ParcelDetail = () => {
       navigate('/dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStations = async () => {
+    try {
+      const response = await api.get('/api/stations');
+      setStations(response.data);
+    } catch (error) {
+      console.error('Error loading stations:', error);
     }
   };
 
@@ -169,14 +204,58 @@ const ParcelDetail = () => {
     }
   };
 
-  // Helper to get station name from ID
-  const getStationName = (stationId) => {
-    if (stationId === parcel?.sender_station_id) {
-      return parcel?.senderStation?.name;
-    } else if (stationId === parcel?.receiver_station_id) {
-      return parcel?.receiverStation?.name;
+  const handleDownloadQR = async () => {
+    if (!parcel) return;
+    
+    try {
+      await downloadQRCode(parcel.tracking_number, {
+        from: parcel.senderStation?.name,
+        to: parcel.receiverStation?.name,
+        status: parcel.status.replace('_', ' ').toUpperCase()
+      });
+      toast.success('QR code downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      toast.error('Failed to download QR code');
     }
-    return 'Unknown Station';
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending': return FaClock;
+      case 'in_transit': return FaTruck;
+      case 'delivered': return FaCheckCircle;
+      case 'returned': return FaArrowDown;
+      case 'lost': return FaExclamationTriangle;
+      default: return FaBox;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+      case 'in_transit': return 'text-blue-600 bg-blue-100 border-blue-200';
+      case 'delivered': return 'text-green-600 bg-green-100 border-green-200';
+      case 'returned': return 'text-gray-600 bg-gray-100 border-gray-200';
+      case 'lost': return 'text-red-600 bg-red-100 border-red-200';
+      default: return 'text-gray-600 bg-gray-100 border-gray-200';
+    }
+  };
+
+  const getTrackingSteps = () => {
+    const steps = [
+      { status: 'pending', label: 'Pending', description: 'Parcel is waiting to be processed' },
+      { status: 'in_transit', label: 'In Transit', description: 'Parcel is being transported' },
+      { status: 'delivered', label: 'Delivered', description: 'Parcel has been delivered' }
+    ];
+    
+    const currentIndex = steps.findIndex(step => step.status === parcel?.status);
+    
+    return steps.map((step, index) => ({
+      ...step,
+      completed: index <= currentIndex,
+      current: index === currentIndex
+    }));
   };
 
   if (loading && !parcel) {
@@ -189,206 +268,234 @@ const ParcelDetail = () => {
 
   return (
     <DashboardLayout title="Parcel Details">
-      <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Parcel {parcel?.tracking_number}</h2>
-        <span className={`px-4 py-1 rounded-full text-sm font-medium ${
-          parcel?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-          parcel?.status === 'in_transit' ? 'bg-blue-100 text-blue-800' :
-          parcel?.status === 'delivered' ? 'bg-green-100 text-green-800' :
-          parcel?.status === 'returned' ? 'bg-gray-100 text-gray-800' :
-          'bg-red-100 text-red-800'
-        }`}>
-          {parcel?.status?.replace('_', ' ').toUpperCase()}
-        </span>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Parcel {parcel?.tracking_number}</h2>
+            <p className="mt-2 text-gray-600">Track and manage parcel details</p>
+          </div>
+          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+            <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium border ${getStatusColor(parcel?.status)}`}>
+              {React.createElement(getStatusIcon(parcel?.status), { className: "w-4 h-4 mr-2" })}
+              {parcel?.status?.replace('_', ' ').toUpperCase()}
+            </span>
+            <button
+              onClick={() => setShowQRCode(!showQRCode)}
+              className="btn-outline flex items-center"
+            >
+              <FaQrcode className="w-4 h-4 mr-2" />
+              QR Code
+            </button>
+          </div>
+        </div>
+
+        {/* QR Code Section */}
+        {showQRCode && (
+          <div className="mt-6 pt-6 border-t border-slate-200">
+            <div className="text-center">
+              <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center justify-center">
+                <FaShare className="w-5 h-5 mr-2" />
+                Share & Track Parcel
+              </h4>
+              <div className="bg-white p-6 rounded-xl shadow-lg inline-block">
+                <img 
+                  src={generateQRCodeDataURL(generateTrackingURL(parcel?.tracking_number), 200)}
+                  alt="Tracking QR Code"
+                  className="mx-auto mb-4"
+                />
+                <p className="text-sm text-slate-600 mb-4">
+                  Scan to track: {parcel?.tracking_number}
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={handleDownloadQR}
+                    className="btn-primary text-sm"
+                  >
+                    <FaDownload className="w-4 h-4 mr-2" />
+                    Download
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateTrackingURL(parcel?.tracking_number));
+                      toast.success('Tracking URL copied to clipboard');
+                    }}
+                    className="btn-secondary text-sm"
+                  >
+                    <FaShare className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Parcel information */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Parcel Information</h3>
-          
-          {/* Display parcel image if available */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Parcel Image */}
           {parcel?.image_url && (
-            <div className="mb-6 flex justify-center">
-              <img 
-                src={parcel.image_url} 
-                alt="Parcel" 
-                className="max-h-96 rounded-lg shadow-md"
-              />
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <FaCamera className="w-5 h-5 mr-2 text-blue-600" />
+                Parcel Image
+              </h3>
+              <div className="flex justify-center">
+                <img 
+                  src={parcel.image_url} 
+                  alt="Parcel" 
+                  className="max-h-96 rounded-xl shadow-md"
+                />
+              </div>
             </div>
           )}
           
-          {/* Image upload form if no image exists */}
+          {/* Image Upload */}
           {!parcel?.image_url && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h4 className="text-md font-medium text-gray-800 mb-3">Upload Parcel Image</h4>
-              <div className="flex items-center">
-                <input
-                  type="file"
-                  id="parcel-image"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  ref={fileInputRef}
-                  className="form-input"
-                />
-                <button 
-                  onClick={uploadImage}
-                  disabled={!image || uploadingImage}
-                  className="ml-4 btn-primary"
-                >
-                  {uploadingImage ? 'Uploading...' : 'Upload'}
-                </button>
-              </div>
-              {imagePreview && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-500 mb-2">Preview:</p>
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="max-h-60 rounded-lg"
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <FaUpload className="w-5 h-5 mr-2 text-blue-600" />
+                Upload Parcel Image
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="file"
+                    id="parcel-image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    ref={fileInputRef}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                  <button 
+                    onClick={uploadImage}
+                    disabled={!image || uploadingImage}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200"
+                  >
+                    {uploadingImage ? 'Uploading...' : 'Upload'}
+                  </button>
                 </div>
+                {imagePreview && (
+                  <div className="relative">
+                    <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="max-h-60 rounded-xl"
+                    />
+                    <button
+                      onClick={() => {
+                        setImage(null);
+                        setImagePreview(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                    >
+                      <FaTimes className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tracking Timeline */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+              <FaHistory className="w-5 h-5 mr-2 text-blue-600" />
+              Tracking Timeline
+            </h3>
+            <div className="space-y-4">
+              {getTrackingSteps().map((step, index) => (
+                <div key={step.status} className="flex items-center">
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                    step.completed 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gray-200 text-gray-400'
+                  }`}>
+                    {step.completed ? (
+                      <FaCheckCircle className="w-4 h-4" />
+                    ) : (
+                      <span className="text-sm font-medium">{index + 1}</span>
+                    )}
+                  </div>
+                  <div className="ml-4 flex-1">
+                    <p className={`text-sm font-medium ${
+                      step.completed ? 'text-gray-900' : 'text-gray-500'
+                    }`}>
+                      {step.label}
+                    </p>
+                    <p className="text-xs text-gray-400">{step.description}</p>
+                  </div>
+                  {step.current && (
+                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                      Current
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+              <FaEnvelope className="w-5 h-5 mr-2 text-blue-600" />
+              Messages
+            </h3>
+            
+            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+              {messages.length > 0 ? (
+                messages.map((message) => (
+                  <div 
+                    key={message.id} 
+                    className={`p-4 rounded-xl ${
+                      message.from_station === currentUser.station_id
+                        ? 'bg-blue-50 ml-8 border-l-4 border-blue-400'
+                        : message.to_station === currentUser.station_id
+                          ? 'bg-gray-50 mr-8 border-l-4 border-gray-400'
+                          : 'bg-gray-50 border border-dashed border-gray-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center">
+                        <FaUser className="w-4 h-4 text-gray-400 mr-2" />
+                        <span className="font-medium">{message.sender?.name}</span>
+                        <span className="mx-2 text-gray-400">→</span>
+                        <span className="font-medium">{message.receiver?.name}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {new Date(message.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-800">{message.content}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-8">No messages yet.</p>
               )}
             </div>
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            <div>
-              <p className="text-sm text-gray-500">From Station</p>
-              <p className="font-medium">{parcel?.senderStation?.name} ({parcel?.senderStation?.code})</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">To Station</p>
-              <p className="font-medium">{parcel?.receiverStation?.name} ({parcel?.receiverStation?.code})</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Sender</p>
-              <p className="font-medium">{parcel?.sender_name}</p>
-              <p className="text-sm text-gray-500">{parcel?.sender_contact}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Receiver</p>
-              <p className="font-medium">{parcel?.receiver_name}</p>
-              <p className="text-sm text-gray-500">{parcel?.receiver_contact}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Weight</p>
-              <p className="font-medium">{parcel?.weight} kg</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Created At</p>
-              <p className="font-medium">{new Date(parcel?.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-          {parcel?.description && (
-            <div className="mt-4">
-              <p className="text-sm text-gray-500">Description</p>
-              <p className="font-medium">{parcel?.description}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Update Status Form */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Update Status</h3>
-          <form onSubmit={handleStatusChange}>
-            <div className="flex items-center">
-              <select 
-                value={newStatus} 
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="form-input mr-4"
-              >
-                <option value="pending">Pending</option>
-                <option value="in_transit">In Transit</option>
-                <option value="delivered">Delivered</option>
-                <option value="returned">Returned</option>
-                <option value="lost">Lost</option>
-              </select>
-              <button type="submit" className="btn-primary">
-                Update Status
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Messages section */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Messages</h3>
-          
-          {/* Message list */}
-          <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-            {messages.length > 0 ? (
-              messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`p-4 rounded-lg ${
-                    message.from_station === currentUser.station_id
-                      ? 'bg-primary-50 ml-12'
-                      : message.to_station === currentUser.station_id
-                        ? 'bg-gray-50 mr-12'
-                        : 'bg-gray-50 border border-dashed border-gray-300' // For copies to other stations
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-medium">{message.sender?.name}</span>
-                      <span className="mx-2 text-gray-500">→</span>
-                      <span className="font-medium">{message.receiver?.name}</span>
-                      
-                      {/* Indicate if this is a copy */}
-                      {message.to_station !== parcel?.sender_station_id && 
-                       message.to_station !== parcel?.receiver_station_id && 
-                       message.is_master_copied && !message.content.startsWith('[COPY]') && (
-                        <span className="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                          FYI Copy
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(message.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-800">{message.content}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No messages yet.</p>
-            )}
-          </div>
-          
-          {/* Information about message visibility */}
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
-            <p>Note: All messages are visible to all stations for transparency and better coordination.</p>
-          </div>
-          
-          {/* New message form with explicit station selection */}
-          <form onSubmit={handleSendMessage}>
-            <div className="mt-4">
-              <div className="mb-4">
-                <label htmlFor="target-station" className="form-label">
+            
+            {/* New Message Form */}
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Send Message To:
                 </label>
                 <select
-                  id="target-station"
-                  className="form-input"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={targetStation || ''}
                   onChange={(e) => setTargetStation(Number(e.target.value))}
                   required
                 >
                   <option value="">Select Station</option>
-                  
-                  {/* Only show sender station if user is not from sender station */}
                   {currentUser.station_id !== parcel?.sender_station_id && (
                     <option value={parcel?.sender_station_id}>
                       {parcel?.senderStation?.name} (Sender)
                     </option>
                   )}
-                  
-                  {/* Only show receiver station if user is not from receiver station */}
                   {currentUser.station_id !== parcel?.receiver_station_id && (
                     <option value={parcel?.receiver_station_id}>
                       {parcel?.receiverStation?.name} (Receiver)
@@ -397,30 +504,140 @@ const ParcelDetail = () => {
                 </select>
               </div>
 
-              <label htmlFor="message" className="form-label">
-                Message Content
-              </label>
-              <textarea
-                id="message"
-                rows={3}
-                className="form-input"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message here..."
-                required
-              ></textarea>
-            </div>
-            <div className="mt-4">
-              <button type="submit" className="btn-primary">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Message:
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your message here..."
+                  required
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              >
                 Send Message
               </button>
-              {targetStation && (
-                <p className="mt-2 text-sm text-gray-500">
-                  This message will be sent to: {getStationName(targetStation)}
-                </p>
-              )}
+            </form>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Parcel Information */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <FaBox className="w-5 h-5 mr-2 text-blue-600" />
+              Parcel Information
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <FaMapMarkerAlt className="w-4 h-4 text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">From</p>
+                  <p className="font-medium">{parcel?.senderStation?.name}</p>
+                  <p className="text-xs text-gray-400">{parcel?.senderStation?.code}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <FaMapMarkerAlt className="w-4 h-4 text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">To</p>
+                  <p className="font-medium">{parcel?.receiverStation?.name}</p>
+                  <p className="text-xs text-gray-400">{parcel?.receiverStation?.code}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <FaWeightHanging className="w-4 h-4 text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">Weight</p>
+                  <p className="font-medium">{parcel?.weight} kg</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <FaCalendar className="w-4 h-4 text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">Created</p>
+                  <p className="font-medium">{new Date(parcel?.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
+
+          {/* Sender/Receiver Details */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <FaUser className="w-5 h-5 mr-2 text-blue-600" />
+              Contact Details
+            </h3>
+            
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Sender</h4>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">{parcel?.sender_name}</p>
+                  {parcel?.sender_contact && (
+                    <div className="flex items-center text-sm text-gray-500">
+                      <FaPhone className="w-3 h-3 mr-2" />
+                      {parcel.sender_contact}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Receiver</h4>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">{parcel?.receiver_name}</p>
+                  {parcel?.receiver_contact && (
+                    <div className="flex items-center text-sm text-gray-500">
+                      <FaPhone className="w-3 h-3 mr-2" />
+                      {parcel.receiver_contact}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Update Status */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <FaEdit className="w-5 h-5 mr-2 text-blue-600" />
+              Update Status
+            </h3>
+            
+            <form onSubmit={handleStatusChange} className="space-y-4">
+              <select 
+                value={newStatus} 
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="pending">Pending</option>
+                <option value="in_transit">In Transit</option>
+                <option value="delivered">Delivered</option>
+                <option value="returned">Returned</option>
+                <option value="lost">Lost</option>
+              </select>
+              
+              <button 
+                type="submit" 
+                className="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
+              >
+                Update Status
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </DashboardLayout>

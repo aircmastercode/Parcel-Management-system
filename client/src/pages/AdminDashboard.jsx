@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { FaTrain, FaUsers, FaBuilding, FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stations, setStations] = useState([]);
   const [users, setUsers] = useState([]);
-  const [view, setView] = useState('stations'); // 'stations' or 'users'
+  const [view, setView] = useState('users'); // Start with 'users' to show the main functionality
   
   // Modal states
   const [showStationModal, setShowStationModal] = useState(false);
@@ -218,167 +219,242 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 flex flex-col items-center justify-center">
         <LoadingSpinner size="large" />
-        <p className="mt-4 text-gray-600">Loading admin data...</p>
+        <p className="mt-4 text-slate-600">Loading admin data...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Railway Admin Portal</h1>
+      <header className="bg-white/80 backdrop-blur-lg shadow-lg border-b border-slate-200/50">
+        <div className="container-responsive py-6 flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="w-12 h-12 gradient-railway rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <FaTrain className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="heading-primary text-gradient">Railway Admin Portal</h1>
+              <p className="text-slate-600 font-medium">System administration and management</p>
+            </div>
+          </div>
           <button 
             onClick={handleLogout}
-            className="btn-outline"
+            className="btn-outline flex items-center"
           >
+            <FaSignOutAlt className="w-4 h-4 mr-2" />
             Logout
           </button>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="container-responsive py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slide-up">
+          <div className="metric-card bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-600 text-sm font-semibold uppercase tracking-wide">Total Users</p>
+                <p className="text-3xl font-bold text-blue-900 mt-2">{users.length}</p>
+                <p className="text-blue-600 text-sm mt-1">Active station users</p>
+              </div>
+              <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <FaUsers className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div className="metric-card bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-600 text-sm font-semibold uppercase tracking-wide">Railway Stations</p>
+                <p className="text-3xl font-bold text-green-900 mt-2">{stations.length}</p>
+                <p className="text-green-600 text-sm mt-1">Active stations</p>
+              </div>
+              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <FaBuilding className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div className="metric-card bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-600 text-sm font-semibold uppercase tracking-wide">System Health</p>
+                <p className="text-3xl font-bold text-purple-900 mt-2">100%</p>
+                <p className="text-purple-600 text-sm mt-1">All systems operational</p>
+              </div>
+              <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <FaTrain className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tab navigation */}
-        <div className="flex border-b mb-6">
-          <button
-            onClick={() => setView('stations')}
-            className={`px-4 py-2 font-medium ${
-              view === 'stations'
-                ? 'text-primary-600 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Railway Stations
-          </button>
+        <div className="flex border-b border-slate-200 mb-8 bg-white/50 backdrop-blur-sm rounded-t-2xl p-1">
           <button
             onClick={() => setView('users')}
-            className={`px-4 py-2 font-medium ${
+            className={`px-6 py-3 font-semibold rounded-xl transition-all duration-200 ${
               view === 'users'
-                ? 'text-primary-600 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-blue-600 shadow-lg border border-blue-200'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
             }`}
           >
+            <FaUsers className="inline w-4 h-4 mr-2" />
             Station Users
+          </button>
+          <button
+            onClick={() => setView('stations')}
+            className={`px-6 py-3 font-semibold rounded-xl transition-all duration-200 ${
+              view === 'stations'
+                ? 'bg-white text-blue-600 shadow-lg border border-blue-200'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+            }`}
+          >
+            <FaBuilding className="inline w-4 h-4 mr-2" />
+            Railway Stations
           </button>
         </div>
 
         {/* Content based on active tab */}
-        {view === 'stations' ? (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Manage Railway Stations</h2>
-              <button className="btn-primary" onClick={handleAddStation}>Add New Station</button>
+        {view === 'users' ? (
+          <div className="animate-fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="heading-secondary">Manage Station Users</h2>
+              <button className="btn-primary flex items-center" onClick={handleAddUser}>
+                <FaPlus className="w-4 h-4 mr-2" />
+                Add New User
+              </button>
             </div>
             
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {stations.map(station => (
-                    <tr key={station.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {station.code}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {station.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {station.location}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          className="text-primary-600 hover:text-primary-800 mr-4"
-                          onClick={() => handleEditStation(station)}
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => handleDeleteStation(station)}
-                        >
-                          Delete
-                        </button>
-                      </td>
+            <div className="card-elevated">
+              <div className="overflow-x-auto">
+                <table className="table-modern">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Station</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id}>
+                        <td>
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 gradient-railway rounded-xl flex items-center justify-center mr-3 text-white font-bold">
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-900">{user.name}</p>
+                              <p className="text-sm text-slate-500">ID: {user.id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <p className="text-slate-900">{user.email}</p>
+                        </td>
+                        <td>
+                          <p className="text-slate-600">{user.phone || 'N/A'}</p>
+                        </td>
+                        <td>
+                          <div className="flex items-center">
+                            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                              {user.station?.name} ({user.station?.code})
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex items-center space-x-2">
+                            <button 
+                              className="btn-ghost text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditUser(user)}
+                            >
+                              <FaEdit className="w-4 h-4" />
+                            </button>
+                            <button 
+                              className="btn-ghost text-red-600 hover:text-red-800"
+                              onClick={() => handleDeleteUser(user)}
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         ) : (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Manage Station Users</h2>
-              <button className="btn-primary" onClick={handleAddUser}>Add New User</button>
+          <div className="animate-fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="heading-secondary">Manage Railway Stations</h2>
+              <button className="btn-primary flex items-center" onClick={handleAddStation}>
+                <FaPlus className="w-4 h-4 mr-2" />
+                Add New Station
+              </button>
             </div>
             
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Station
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(user => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {user.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.station?.name} ({user.station?.code})
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          className="text-primary-600 hover:text-primary-800 mr-4"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => handleDeleteUser(user)}
-                        >
-                          Delete
-                        </button>
-                      </td>
+            <div className="card-elevated">
+              <div className="overflow-x-auto">
+                <table className="table-modern">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>Users</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {stations.map(station => (
+                      <tr key={station.id}>
+                        <td>
+                          <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-lg font-mono font-bold">
+                            {station.code}
+                          </span>
+                        </td>
+                        <td>
+                          <p className="font-semibold text-slate-900">{station.name}</p>
+                        </td>
+                        <td>
+                          <p className="text-slate-600">{station.location}</p>
+                        </td>
+                        <td>
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm">
+                            {users.filter(u => u.station_id === station.id).length} users
+                          </span>
+                        </td>
+                        <td>
+                          <div className="flex items-center space-x-2">
+                            <button 
+                              className="btn-ghost text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditStation(station)}
+                            >
+                              <FaEdit className="w-4 h-4" />
+                            </button>
+                            <button 
+                              className="btn-ghost text-red-600 hover:text-red-800"
+                              onClick={() => handleDeleteStation(station)}
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -389,68 +465,71 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
             </div>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleStationSubmit}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                <div className="bg-white px-6 pt-6 pb-4">
+                  <h3 className="text-xl font-bold text-slate-900 mb-6">
                     {currentStation ? 'Edit Station' : 'Add New Station'}
                   </h3>
                   
-                  <div className="mt-4 space-y-4">
+                  <div className="space-y-4">
                     <div>
-                      <label htmlFor="code" className="block text-sm font-medium text-gray-700">Station Code</label>
+                      <label htmlFor="code" className="form-label">Station Code</label>
                       <input
                         type="text"
                         name="code"
                         id="code"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={stationForm.code}
                         onChange={handleStationFormChange}
+                        placeholder="e.g., CNB, DHN"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">Station Name</label>
+                      <label htmlFor="name" className="form-label">Station Name</label>
                       <input
                         type="text"
                         name="name"
                         id="name"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={stationForm.name}
                         onChange={handleStationFormChange}
+                        placeholder="e.g., KANPUR CENTRAL JN."
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+                      <label htmlFor="location" className="form-label">Location</label>
                       <input
                         type="text"
                         name="location"
                         id="location"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={stationForm.location}
                         onChange={handleStationFormChange}
+                        placeholder="e.g., Kanpur"
                       />
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-slate-50 px-6 py-4 flex flex-row-reverse space-x-reverse space-x-3">
                   <button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-primary"
                   >
                     {currentStation ? 'Update' : 'Create'}
                   </button>
                   <button
                     type="button"
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-outline"
                     onClick={() => setShowStationModal(false)}
                   >
                     Cancel
@@ -467,62 +546,65 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
             </div>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleUserSubmit}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                <div className="bg-white px-6 pt-6 pb-4">
+                  <h3 className="text-xl font-bold text-slate-900 mb-6">
                     {currentUser ? 'Edit User' : 'Add New User'}
                   </h3>
                   
-                  <div className="mt-4 space-y-4">
+                  <div className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                      <label htmlFor="name" className="form-label">Name</label>
                       <input
                         type="text"
                         name="name"
                         id="name"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={userForm.name}
                         onChange={handleUserFormChange}
+                        placeholder="Enter full name"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                      <label htmlFor="email" className="form-label">Email</label>
                       <input
                         type="email"
                         name="email"
                         id="email"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={userForm.email}
                         onChange={handleUserFormChange}
+                        placeholder="Enter email address"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone (Optional)</label>
+                      <label htmlFor="phone" className="form-label">Phone (Optional)</label>
                       <input
                         type="text"
                         name="phone"
                         id="phone"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={userForm.phone}
                         onChange={handleUserFormChange}
+                        placeholder="Enter phone number"
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="station_id" className="block text-sm font-medium text-gray-700">Station</label>
+                      <label htmlFor="station_id" className="form-label">Station</label>
                       <select
                         name="station_id"
                         id="station_id"
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className="form-input"
                         value={userForm.station_id}
                         onChange={handleUserFormChange}
                       >
@@ -537,16 +619,16 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-slate-50 px-6 py-4 flex flex-row-reverse space-x-reverse space-x-3">
                   <button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-primary"
                   >
                     {currentUser ? 'Update' : 'Create'}
                   </button>
                   <button
                     type="button"
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-outline"
                     onClick={() => setShowUserModal(false)}
                   >
                     Cancel
@@ -563,40 +645,43 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
             </div>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-6 pt-6 pb-4">
+                <div className="flex items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl bg-red-100">
+                    <FaTrash className="h-6 w-6 text-red-600" />
                   </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                    <h3 className="text-lg font-bold text-slate-900">
                       Confirm Delete
                     </h3>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-slate-500">
                         Are you sure you want to delete this {deleteType}? This action cannot be undone.
                       </p>
+                      {deleteType === 'user' && (
+                        <p className="text-sm text-red-600 mt-2 font-medium">
+                          This will immediately log out the user from all devices.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-slate-50 px-6 py-4 flex flex-row-reverse space-x-reverse space-x-3">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="btn-danger"
                   onClick={deleteType === 'station' ? confirmDeleteStation : confirmDeleteUser}
                 >
                   Delete
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="btn-outline"
                   onClick={() => setShowDeleteConfirm(false)}
                 >
                   Cancel

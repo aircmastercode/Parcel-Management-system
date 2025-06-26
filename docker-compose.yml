@@ -32,7 +32,7 @@ services:
     container_name: parcel-management-client
     working_dir: /app
     command: >
-      bash -c "npm install && npm run dev -- --host"
+      bash -c "npm install && npm run dev"
     restart: always
     ports:
       - "3000:3000"
