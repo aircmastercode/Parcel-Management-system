@@ -53,12 +53,12 @@ const StationDashboard = () => {
   return (
     <DashboardLayout title="Station Dashboard">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">{currentUser?.station?.name}</h2>
+        <h2 className="text-2xl font-bold text-charcoal">{currentUser?.station?.name}</h2>
         <div className="flex items-center">
-          <span className="px-3 py-1 bg-primary-100 text-primary-800 font-bold rounded-lg mr-2">
+          <span className="px-3 py-1 bg-soft-gray text-accent-black font-bold rounded-lg mr-2">
             {currentUser?.station?.code}
           </span>
-          <p className="text-gray-600">User ID: {currentUser?.name}</p>
+          <p className="text-body-text">User ID: {currentUser?.name}</p>
         </div>
       </div>
 
@@ -66,49 +66,49 @@ const StationDashboard = () => {
       <div className="bg-white shadow rounded-lg mb-8">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Recent Parcels</h3>
-            <Link to="/parcels" className="text-primary-600 hover:text-primary-800">
+            <h3 className="text-lg font-medium text-charcoal">Recent Parcels</h3>
+            <Link to="/parcels" className="text-accent-black hover:text-accent-black">
               View all
             </Link>
           </div>
           
           {parcels.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border-soft-gray">
+                <thead className="bg-beige">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking #</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From/To</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-text uppercase tracking-wider">Tracking #</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-text uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-text uppercase tracking-wider">From/To</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-text uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-text uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-border-soft-gray">
                   {parcels.slice(0, 5).map(parcel => (
                     <tr key={parcel.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{parcel.tracking_number}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">{parcel.tracking_number}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          parcel.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          parcel.status === 'in_transit' ? 'bg-blue-100 text-blue-800' :
-                          parcel.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
+                          parcel.status === 'pending' ? 'bg-soft-gray text-accent-black' :
+                          parcel.status === 'in_transit' ? 'bg-soft-gray text-accent-black' :
+                          parcel.status === 'delivered' ? 'bg-soft-gray text-accent-black' :
+                          'bg-soft-gray text-accent-black'
                         }`}>
                           {parcel.status.replace('_', ' ').toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-body-text">
                         {parcel.sender_station_id === currentUser.station_id
                           ? `To: ${parcel.receiverStation?.name}`
                           : `From: ${parcel.senderStation?.name}`
                         }
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-body-text">
                         {new Date(parcel.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Link to={`/parcel/${parcel.id}`} className="text-primary-600 hover:text-primary-800">
+                        <Link to={`/parcel/${parcel.id}`} className="text-accent-black hover:text-accent-black">
                           View
                         </Link>
                       </td>
@@ -118,7 +118,7 @@ const StationDashboard = () => {
               </table>
             </div>
           ) : (
-            <p className="text-gray-500">No parcels available.</p>
+            <p className="text-body-text">No parcels available.</p>
           )}
         </div>
       </div>
@@ -127,13 +127,13 @@ const StationDashboard = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Recent Messages</h3>
-            <Link to="/messages" className="text-primary-600 hover:text-primary-800">
+            <h3 className="text-lg font-medium text-charcoal">Recent Messages</h3>
+            <Link to="/messages" className="text-accent-black hover:text-accent-black">
               View all
             </Link>
           </div>
           
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+          <div className="mb-4 p-3 bg-soft-gray border border-border-soft-gray rounded-md text-sm text-accent-black">
             <p>Showing messages from all stations for better system visibility and coordination.</p>
           </div>
           
@@ -144,36 +144,36 @@ const StationDashboard = () => {
                   key={message.id} 
                   className={`border-l-4 p-4 ${
                     message.to_station === currentUser.station_id
-                      ? 'border-primary-500 bg-primary-50'
+                      ? 'border-accent-black bg-accent-black-10'
                       : message.from_station === currentUser.station_id
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-300 bg-gray-50'
+                        ? 'border-accent-black bg-accent-black-10'
+                        : 'border-border-soft-gray bg-accent-black-5'
                   }`}
                 >
                   <div className="flex justify-between">
                     <div>
                       <span className="font-medium">{message.sender?.name}</span>
-                      <span className="mx-2 text-gray-500">→</span>
+                      <span className="mx-2 text-body-text">→</span>
                       <span className="font-medium">{message.receiver?.name}</span>
                       
                       {message.to_station === currentUser.station_id && (
-                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        <span className="ml-2 bg-accent-black-10 text-accent-black text-xs px-2 py-1 rounded-full">
                           To Your Station
                         </span>
                       )}
                       {message.from_station === currentUser.station_id && (
-                        <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                        <span className="ml-2 bg-accent-black-10 text-accent-black text-xs px-2 py-1 rounded-full">
                           From Your Station
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-body-text">
                       {new Date(message.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <p className="mt-1">{message.content}</p>
                   <div className="mt-2">
-                    <Link to={`/parcel/${message.parcel_id}`} className="text-sm text-primary-600 hover:text-primary-800">
+                    <Link to={`/parcel/${message.parcel_id}`} className="text-sm text-accent-black hover:text-accent-black">
                       View Parcel: {message.parcel?.tracking_number}
                     </Link>
                   </div>
@@ -181,7 +181,7 @@ const StationDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No messages available.</p>
+            <p className="text-body-text">No messages available.</p>
           )}
         </div>
       </div>

@@ -67,45 +67,45 @@ const MasterDashboard = () => {
   return (
     <DashboardLayout title="Master Dashboard">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Railway Control Panel</h2>
+        <h2 className="text-2xl font-bold text-charcoal">Railway Control Panel</h2>
         <div className="flex items-center">
-          <span className="px-3 py-1 bg-primary-100 text-primary-800 font-bold rounded-lg mr-2">
+          <span className="px-3 py-1 bg-soft-gray text-accent-black font-bold rounded-lg mr-2">
             {currentUser?.station?.code}
           </span>
-          <p className="text-gray-600">{currentUser?.station?.name} - System Overview</p>
+          <p className="text-body-text">{currentUser?.station?.name} - System Overview</p>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-primary-500">
-          <h3 className="text-lg font-medium text-gray-500">Total Parcels</h3>
-          <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalParcels}</p>
-          <Link to="/parcels" className="text-primary-600 text-sm mt-2 block hover:underline">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-soft-gray">
+          <h3 className="text-lg font-medium text-charcoal">Total Parcels</h3>
+          <p className="text-3xl font-bold text-accent-black mt-2">{stats.totalParcels}</p>
+          <Link to="/parcels" className="text-accent-black text-sm mt-2 block hover:underline">
             View all parcels
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-          <h3 className="text-lg font-medium text-gray-500">Stations</h3>
-          <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalStations}</p>
-          <Link to="/stations" className="text-primary-600 text-sm mt-2 block hover:underline">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-soft-gray">
+          <h3 className="text-lg font-medium text-charcoal">Stations</h3>
+          <p className="text-3xl font-bold text-accent-black mt-2">{stats.totalStations}</p>
+          <Link to="/stations" className="text-accent-black text-sm mt-2 block hover:underline">
             Manage stations
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
-          <h3 className="text-lg font-medium text-gray-500">Users</h3>
-          <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalUsers}</p>
-          <Link to="/users" className="text-primary-600 text-sm mt-2 block hover:underline">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-soft-gray">
+          <h3 className="text-lg font-medium text-charcoal">Users</h3>
+          <p className="text-3xl font-bold text-accent-black mt-2">{stats.totalUsers}</p>
+          <Link to="/users" className="text-accent-black text-sm mt-2 block hover:underline">
             Manage users
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-          <h3 className="text-lg font-medium text-gray-500">Unread Messages</h3>
-          <p className="text-3xl font-bold text-gray-800 mt-2">{stats.unreadMessages}</p>
-          <Link to="/messages" className="text-primary-600 text-sm mt-2 block hover:underline">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-soft-gray">
+          <h3 className="text-lg font-medium text-charcoal">Unread Messages</h3>
+          <p className="text-3xl font-bold text-accent-black mt-2">{stats.unreadMessages}</p>
+          <Link to="/messages" className="text-accent-black text-sm mt-2 block hover:underline">
             View all messages
           </Link>
         </div>
@@ -113,22 +113,23 @@ const MasterDashboard = () => {
 
       {/* Recent Messages */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Messages</h3>
+        <h3 className="text-lg font-semibold text-charcoal mb-4">Recent Messages</h3>
         {messages.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">From</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">To</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Content</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {messages.slice(0, 5).map(message => (
                   <tr key={message.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-accent-black">{message.sender?.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{message.sender?.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{message.receiver?.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{message.content}</td>

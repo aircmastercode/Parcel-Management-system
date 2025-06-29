@@ -217,13 +217,13 @@ Admins (id, username, email, role, last_otp, otp_expires_at, createdAt, updatedA
 - Git
 
 ### **1. Clone and Setup**
-```bash
-git clone <repository-url>
+   ```bash
+   git clone <repository-url>
 cd Parcel-Management-system
-```
+   ```
 
 ### **2. Start with Docker**
-```bash
+   ```bash
 docker-compose up -d
 ```
 
@@ -239,7 +239,7 @@ docker-compose up -d
 ## 🔧 Configuration
 
 ### **Environment Variables**
-```bash
+   ```bash
 # Server Configuration
 PORT=8000
 NODE_ENV=development
@@ -419,12 +419,12 @@ GET  /api/parcels/track/:number  # Track parcel by number
 ## 🔧 Development
 
 ### **Local Development**
-```bash
+   ```bash
 # Install dependencies
 npm run install:all
 
 # Start development servers
-npm run dev
+   npm run dev
 
 # Docker development
 docker-compose up --build

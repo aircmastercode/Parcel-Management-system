@@ -88,7 +88,7 @@ const Messages = () => {
   return (
     <DashboardLayout title="Railway Messages">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Railway Message Center</h2>
+        <h2 className="text-2xl font-bold text-charcoal">Railway Message Center</h2>
         <div className="flex items-center space-x-2">
           <select
             value={filter}
@@ -108,8 +108,8 @@ const Messages = () => {
           onClick={() => setViewMode('all')}
           className={`px-4 py-2 font-medium ${
             viewMode === 'all'
-              ? 'text-primary-600 border-b-2 border-primary-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-accent-black border-b-2 border-accent-black'
+              : 'text-secondary-text hover:text-body-text'
           }`}
         >
           All Messages
@@ -118,8 +118,8 @@ const Messages = () => {
           onClick={() => setViewMode('involving-me')}
           className={`px-4 py-2 font-medium ${
             viewMode === 'involving-me'
-              ? 'text-primary-600 border-b-2 border-primary-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-accent-black border-b-2 border-accent-black'
+              : 'text-secondary-text hover:text-body-text'
           }`}
         >
           Involving My Station
@@ -128,8 +128,8 @@ const Messages = () => {
           onClick={() => setViewMode('others')}
           className={`px-4 py-2 font-medium ${
             viewMode === 'others'
-              ? 'text-primary-600 border-b-2 border-primary-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-accent-black border-b-2 border-accent-black'
+              : 'text-secondary-text hover:text-body-text'
           }`}
         >
           Other Stations
@@ -142,34 +142,34 @@ const Messages = () => {
             <div 
               key={message.id} 
               className={`bg-white shadow rounded-lg p-4 border-l-4 ${
-                message.read ? 'border-gray-300' : 'border-primary-500'
+                message.read ? 'border-soft-gray' : 'border-accent-black'
               }`}
             >
               <div className="flex justify-between mb-2">
                 <div>
                   <span className="font-medium">{message.sender?.name}</span>
-                  <span className="mx-2 text-gray-500">→</span>
+                  <span className="mx-2 text-secondary-text">→</span>
                   <span className="font-medium">{message.receiver?.name}</span>
                   
                   {/* Clearly indicate if this is a message to/from your station */}
                   {message.to_station === currentUser.station_id && (
-                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">To Your Station</span>
+                    <span className="ml-2 bg-soft-gray text-accent-black text-xs px-2 py-1 rounded-full">To Your Station</span>
                   )}
                   {message.from_station === currentUser.station_id && (
-                    <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">From Your Station</span>
+                    <span className="ml-2 bg-soft-gray text-accent-black text-xs px-2 py-1 rounded-full">From Your Station</span>
                   )}
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-secondary-text">
                   {new Date(message.createdAt).toLocaleString()}
                 </span>
               </div>
               
-              <p className="text-gray-700 mb-3">{message.content}</p>
+              <p className="text-body-text mb-3">{message.content}</p>
               
               <div className="flex justify-between items-center mt-2">
                 <Link 
                   to={`/parcel/${message.parcel_id}`} 
-                  className="text-sm text-primary-600 hover:text-primary-800"
+                  className="text-sm text-accent-black hover:text-accent-black"
                 >
                   View Parcel: {message.parcel?.tracking_number}
                 </Link>
@@ -177,7 +177,7 @@ const Messages = () => {
                 {!message.read && message.to_station === currentUser.station_id && (
                   <button
                     onClick={() => handleMarkAsRead(message.id)}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-3 rounded"
+                    className="text-xs bg-soft-gray hover:bg-accent-black text-accent-black py-1 px-3 rounded"
                   >
                     Mark as Read
                   </button>
@@ -188,7 +188,7 @@ const Messages = () => {
         </div>
       ) : (
         <div className="bg-white shadow rounded-lg p-6 text-center">
-          <p className="text-gray-500">
+          <p className="text-secondary-text">
             {viewMode === 'involving-me' 
               ? 'No messages involving your station.' 
               : viewMode === 'others'

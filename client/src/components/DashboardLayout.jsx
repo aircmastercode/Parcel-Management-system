@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationSystem from './NotificationSystem';
+import DeveloperCredit from './DeveloperCredit';
 import { 
   FaBars, 
   FaTimes, 
@@ -123,6 +124,9 @@ const DashboardLayout = ({ children, title }) => {
           
           {/* Logout button */}
           <div className="p-4 border-t border-white/10">
+            {/* Developer Credit */}
+            <DeveloperCredit variant="dark" className="mb-3" showSocialLinks={true} />
+            
             <button
               className="flex items-center w-full px-4 py-3 text-blue-50 hover:text-white hover:bg-white/15 rounded-2xl transition-all duration-200 group hover:font-medium"
               onClick={handleLogout}

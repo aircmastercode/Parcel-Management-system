@@ -178,15 +178,15 @@ const NewParcel = () => {
   return (
     <DashboardLayout title="New Railway Parcel">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Create New Railway Parcel</h2>
-        <p className="text-gray-600">Fill in the details to create a new parcel for railway transport</p>
+        <h2 className="text-2xl font-bold text-charcoal">Create New Railway Parcel</h2>
+        <p className="text-body-text">Fill in the details to create a new parcel for railway transport</p>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Station Information</h3>
+              <h3 className="text-lg font-medium text-charcoal mb-4">Station Information</h3>
             </div>
 
             <div>
@@ -233,7 +233,7 @@ const NewParcel = () => {
             </div>
 
             <div className="col-span-2">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 mt-4">Parcel Information</h3>
+              <h3 className="text-lg font-medium text-charcoal mb-4 mt-4">Parcel Information</h3>
             </div>
 
             <div>
@@ -264,7 +264,7 @@ const NewParcel = () => {
             
             <div className="col-span-2">
               <label htmlFor="image" className="form-label">Parcel Image (Optional)</label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border-soft-gray rounded-md">
                 <div className="space-y-1 text-center">
                   {imagePreview ? (
                     <div className="relative mx-auto">
@@ -276,7 +276,7 @@ const NewParcel = () => {
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                        className="absolute top-0 right-0 bg-accent-black text-white rounded-full w-6 h-6 flex items-center justify-center"
                       >
                         ×
                       </button>
@@ -284,7 +284,7 @@ const NewParcel = () => {
                   ) : (
                     <>
                       <svg
-                        className="mx-auto h-12 w-12 text-gray-400"
+                        className="mx-auto h-12 w-12 text-secondary-text"
                         stroke="currentColor"
                         fill="none"
                         viewBox="0 0 48 48"
@@ -297,7 +297,7 @@ const NewParcel = () => {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      <div className="flex text-sm text-gray-600 justify-center">
+                      <div className="flex text-sm text-body-text justify-center">
                         <label
                           htmlFor="image"
                           className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500"
@@ -315,7 +315,7 @@ const NewParcel = () => {
                         </label>
                         <p className="pl-1">or drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                      <p className="text-xs text-secondary-text">PNG, JPG, JPEG up to 5MB</p>
                     </>
                   )}
                 </div>
@@ -323,7 +323,7 @@ const NewParcel = () => {
             </div>
 
             <div className="col-span-2">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 mt-4">Sender/Receiver Details</h3>
+              <h3 className="text-lg font-medium text-charcoal mb-4 mt-4">Sender/Receiver Details</h3>
             </div>
 
             <div>
@@ -377,7 +377,7 @@ const NewParcel = () => {
             </div>
             
             <div className="col-span-2">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 mt-4">Initial Message</h3>
+              <h3 className="text-lg font-medium text-charcoal mb-4 mt-4">Initial Message</h3>
               <label htmlFor="initial_message" className="form-label">Message</label>
               <textarea
                 id="initial_message"
@@ -389,7 +389,7 @@ const NewParcel = () => {
                 placeholder="Enter an initial message about this parcel"
                 required
               ></textarea>
-              <p className="mt-1 text-sm text-gray-500">This message will be sent to the receiver station.</p>
+              <p className="mt-1 text-sm text-body-text">This message will be sent to the receiver station.</p>
             </div>
           </div>
 

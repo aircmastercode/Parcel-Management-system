@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import api from '../services/api';
+import DeveloperCredit from '../components/DeveloperCredit';
 import { generateQRCodeDataURL, generateTrackingURL } from '../utils/qrGenerator';
 
 const PublicTracking = () => {
@@ -380,7 +381,17 @@ const PublicTracking = () => {
             <FaTrain className="w-6 h-6 mr-2" />
             <span className="text-lg font-semibold">Railway Parcel Management System</span>
           </div>
-          <p className="text-slate-400">Reliable parcel tracking and management for railway networks</p>
+          <p className="text-slate-400 mb-6">Reliable parcel tracking and management for railway networks</p>
+          
+          {/* Developer Credit */}
+          <div className="border-t border-slate-700 pt-6">
+            <DeveloperCredit 
+              variant="footer" 
+              showTitle={true} 
+              showDescription={true}
+              showSocialLinks={true}
+            />
+          </div>
         </div>
       </footer>
     </div>
