@@ -118,6 +118,14 @@ async function seedDatabase() {
       role: 'user'
     });
     
+    // Add Tanush user for Delhi station for OTP testing
+    const tanushUser = await User.create({
+      name: 'Tanush',
+      email: 'tanushsinghal22082004@gmail.com',
+      station_id: station3.id, // Delhi station (DLI)
+      role: 'user'
+    });
+    
     // Create parcels
     console.log('Creating parcels...');
     const parcel1 = await Parcel.create({

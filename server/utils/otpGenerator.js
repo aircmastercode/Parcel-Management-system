@@ -1,4 +1,5 @@
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 
 /**
  * Generates a random OTP code
@@ -14,7 +15,69 @@ const generateOTP = (length = 6) => {
 };
 
 /**
- * Send OTP via Postmark (production email service)
+ * Send OTP via Gmail SMTP (primary email service)
+ * @param {string} email - Email address to send OTP to
+ * @param {string} otp - OTP code
+ * @returns {Promise} - Promise with success/error
+ */
+const sendOTPViaGmail = async (email, otp) => {
+  try {
+    // Create Gmail transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'crisrailwayhead@gmail.com',
+        pass: 'eknl hlkq cppj ofcw'
+      }
+    });
+
+    const mailOptions = {
+      from: '"Railway Parcel Management" <crisrailwayhead@gmail.com>',
+      to: email,
+      subject: 'Railway Parcel Management - OTP Code',
+      text: `Your OTP code for Railway Parcel Management System is: ${otp}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.`,
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #2c3e50; text-align: center;">🚂 Railway Parcel Management System</h2>
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #2c3e50; margin-top: 0;">Your OTP Code</h3>
+                <div style="background-color: #fff; padding: 15px; border: 2px solid #3498db; border-radius: 5px; text-align: center; margin: 15px 0;">
+                  <span style="font-size: 24px; font-weight: bold; color: #3498db; letter-spacing: 3px;">${otp}</span>
+                </div>
+                <p style="margin-bottom: 10px;"><strong>This code will expire in 10 minutes.</strong></p>
+                <p style="color: #7f8c8d; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+              </div>
+              <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                <p style="color: #7f8c8d; font-size: 12px;">Railway Parcel Management System</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log('Gmail OTP Response:', info);
+    return {
+      success: true,
+      message: `OTP sent successfully to ${email} via Gmail`,
+      data: info
+    };
+  } catch (error) {
+    console.error('Gmail OTP Error:', error.message);
+    return {
+      success: false,
+      message: 'Failed to send OTP via Gmail',
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Send OTP via Postmark (fallback email service)
  * @param {string} email - Email address to send OTP to
  * @param {string} otp - OTP code
  * @returns {Promise} - Promise with success/error
@@ -135,11 +198,22 @@ const sendOTP = async (recipient, otp) => {
     };
   }
 
-  // For emails, try Postmark first, then fallback
+  // For emails, try Gmail first, then fallback
   console.log(`Attempting to send OTP ${otp} to ${recipient}`);
   
-  // Try Postmark first (primary service)
-  console.log('Trying Postmark...');
+  // Try Gmail first (primary service)
+  console.log('Trying Gmail SMTP...');
+  const gmailResult = await sendOTPViaGmail(recipient, otp);
+  
+  if (gmailResult.success) {
+    return {
+      ...gmailResult,
+      service: 'gmail'
+    };
+  }
+  
+  // Try Postmark as first fallback
+  console.log('Gmail failed, trying Postmark...');
   const postmarkResult = await sendOTPViaPostmark(recipient, otp);
   
   if (postmarkResult.success) {
@@ -149,7 +223,7 @@ const sendOTP = async (recipient, otp) => {
     };
   }
   
-  // Try RapidAPI as fallback
+  // Try RapidAPI as second fallback
   console.log('Postmark failed, trying RapidAPI...');
   const rapidAPIResult = await sendOTPViaRapidAPI(recipient, otp);
   
@@ -194,6 +268,7 @@ module.exports = {
   generateOTP,
   sendOTP,
   verifyOTP,
+  sendOTPViaGmail,
   sendOTPViaPostmark,
   sendOTPViaRapidAPI
 }; 
