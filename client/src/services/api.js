@@ -10,15 +10,26 @@ const api = axios.create({
 // Add a request interceptor
 api.interceptors.request.use(
   config => {
-    // Check for admin token first, then regular user token
+    // Check if this is an admin-specific endpoint
+    const isAdminEndpoint = config.url && (
+      config.url.includes('/api/admin/') || 
+      config.url.includes('/admin/')
+    );
+    
+    // Check for tokens
     const adminToken = localStorage.getItem('admin_token');
     const userToken = localStorage.getItem('token');
     
-    if (adminToken) {
+    // Use admin token only for admin endpoints, otherwise use user token
+    if (isAdminEndpoint && adminToken) {
       config.headers['x-auth-token'] = adminToken;
     } else if (userToken) {
       config.headers['x-auth-token'] = userToken;
+    } else if (adminToken && !userToken) {
+      // Fallback to admin token if no user token exists
+      config.headers['x-auth-token'] = adminToken;
     }
+    
     return config;
   },
   error => {

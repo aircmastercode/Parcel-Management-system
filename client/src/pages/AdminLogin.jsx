@@ -51,6 +51,10 @@ const AdminLogin = () => {
     try {
       const response = await api.post('/api/admin/verify-otp', { email, otp });
       
+      // Clear any existing user session when logging in as admin
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_data');
+      
       // Save admin token
       localStorage.setItem('admin_token', response.data.token);
       localStorage.setItem('is_admin', 'true');

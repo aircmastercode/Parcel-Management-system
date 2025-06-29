@@ -19,6 +19,8 @@ export const AuthProvider = ({ children }) => {
   const logout = (showMessage = false) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user_data');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('is_admin');
     delete api.defaults.headers.common['x-auth-token'];
     setCurrentUser(null);
     setEmailOrPhone('');
@@ -31,7 +33,10 @@ export const AuthProvider = ({ children }) => {
 
   // Function to clear all authentication data (for error recovery)
   const clearAuthData = () => {
-    localStorage.clear(); // Clear all localStorage data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('is_admin');
     delete api.defaults.headers.common['x-auth-token'];
     setCurrentUser(null);
     setEmailOrPhone('');
@@ -67,7 +72,16 @@ export const AuthProvider = ({ children }) => {
     );
 
     // Check for saved token and validate user
+    // Only check for user token, not admin token
     const token = localStorage.getItem('token');
+    const isAdmin = localStorage.getItem('is_admin');
+    
+    // If user is admin, don't try to authenticate as regular user
+    if (isAdmin) {
+      console.log('Admin session detected, skipping user authentication');
+      setLoading(false);
+      return;
+    }
     
     if (token) {
       api.defaults.headers.common['x-auth-token'] = token;
@@ -183,6 +197,10 @@ export const AuthProvider = ({ children }) => {
       
       // Validate complete user data
       if (user && user.id && user.name && user.role && user.station) {
+        // Clear any admin session when logging in as user
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('is_admin');
+        
         localStorage.setItem('token', token);
         localStorage.setItem('user_data', JSON.stringify(user));
         api.defaults.headers.common['x-auth-token'] = token;

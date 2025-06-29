@@ -210,8 +210,11 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
+    // Clear all authentication data
     localStorage.removeItem('admin_token');
     localStorage.removeItem('is_admin');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_data');
     delete api.defaults.headers.common['x-auth-token'];
     navigate('/admin/login');
     toast.info('Logged out successfully');
