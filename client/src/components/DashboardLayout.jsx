@@ -59,38 +59,35 @@ const DashboardLayout = ({ children, title }) => {
       <div className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex flex-col h-full shadow-2xl border-r border-white/10" style={{
-          background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
-          backdropFilter: 'blur(20px)'
-        }}>
+        <div className="flex flex-col h-full shadow-2xl border-r border-mid-gray bg-charcoal">
           {/* Sidebar header */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-white/10">
+          <div className="flex items-center justify-between h-20 px-6 border-b border-mid-gray">
             <div className="flex items-center">
-              <div className="w-10 h-10 gradient-railway rounded-xl flex items-center justify-center mr-3 shadow-lg">
+              <div className="w-10 h-10 bg-railway-primary rounded-xl flex items-center justify-center mr-3 shadow-lg">
                 <FaTrain className="w-6 h-6 text-white" />
               </div>
               <div>
                 <span className="text-xl font-bold text-white drop-shadow-sm">Railway PMS</span>
-                <p className="text-xs text-blue-100 drop-shadow-sm">Management System</p>
+                <p className="text-xs text-secondary-text drop-shadow-sm">Management System</p>
               </div>
             </div>
-            <button className="lg:hidden text-white hover:text-blue-200 transition-colors" onClick={toggleSidebar}>
+            <button className="lg:hidden text-white hover:text-railway-primary transition-colors" onClick={toggleSidebar}>
               <FaTimes className="w-6 h-6" />
             </button>
           </div>
           
           {/* User info */}
-          <div className="px-6 py-6 border-b border-white/10">
+          <div className="px-6 py-6 border-b border-mid-gray">
             <div className="flex items-center">
-              <div className="w-12 h-12 gradient-railway-success rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-12 h-12 bg-railway-primary rounded-2xl flex items-center justify-center mr-4 shadow-lg">
                 <FaUser className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold truncate drop-shadow-sm">{currentUser?.name || 'Loading...'}</p>
-                <p className="text-blue-100 text-sm truncate drop-shadow-sm">{currentUser?.station?.name || 'Loading station...'}</p>
+                <p className="text-secondary-text text-sm truncate drop-shadow-sm">{currentUser?.station?.name || 'Loading station...'}</p>
                 <div className="flex items-center mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse shadow-lg"></div>
-                  <span className="text-xs text-green-200 drop-shadow-sm font-medium">Online</span>
+                  <div className="w-2 h-2 bg-success rounded-full mr-2 animate-pulse shadow-lg"></div>
+                  <span className="text-xs text-success drop-shadow-sm font-medium">Online</span>
                 </div>
               </div>
             </div>
@@ -105,30 +102,31 @@ const DashboardLayout = ({ children, title }) => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 group ${
+                  className={`relative flex items-center px-4 py-3 text-sm transition-all duration-200 group ${
                     active
-                      ? 'bg-white/25 text-white shadow-xl backdrop-blur-sm border border-white/30 font-semibold'
-                      : 'text-blue-50 hover:bg-white/15 hover:text-white hover:shadow-lg hover:font-medium'
+                      ? 'font-bold bg-railway-primary/20 text-blue-200 rounded-2xl'
+                      : 'text-white hover:bg-railway-primary/10 hover:text-railway-primary hover:font-semibold rounded-2xl'
                   }`}
                   onClick={() => setSidebarOpen(false)}
+                  style={active ? { boxShadow: 'none' } : {}}
                 >
-                  <Icon className={`w-5 h-5 mr-3 transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-110'}`} />
-                  <span className="truncate">{item.name}</span>
                   {active && (
-                    <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    <div className="absolute left-0 top-2 bottom-2 w-3 bg-railway-primary rounded-r-full shadow-lg ring-2 ring-railway-primary/30 transition-all duration-200"></div>
                   )}
+                  <Icon className={`mr-3 transition-all duration-200 ${active ? 'w-6 h-6 text-blue-200' : 'w-5 h-5 text-white group-hover:text-railway-primary'}`} />
+                  <span className="truncate">{item.name}</span>
                 </Link>
               );
             })}
           </nav>
           
           {/* Logout button */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-mid-gray">
             {/* Developer Credit */}
             <DeveloperCredit variant="dark" className="mb-3" showSocialLinks={true} />
             
             <button
-              className="flex items-center w-full px-4 py-3 text-blue-50 hover:text-white hover:bg-white/15 rounded-2xl transition-all duration-200 group hover:font-medium"
+              className="flex items-center w-full px-4 py-3 text-white hover:text-accent hover:bg-accent/10 rounded-2xl transition-all duration-200 group hover:font-medium"
               onClick={handleLogout}
             >
               <FaSignOutAlt className="w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-110" />

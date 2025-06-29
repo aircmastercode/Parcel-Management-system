@@ -122,7 +122,7 @@ const PublicTracking = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header */}
-      <header className="bg-white shadow-lg border-b border-slate-200">
+      <header className="bg-white shadow-lg border-b border-mid-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -130,8 +130,8 @@ const PublicTracking = () => {
                 <FaTrain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">Railway Parcel Tracking</h1>
-                <p className="text-sm text-slate-600">Track your parcels in real-time</p>
+                <h1 className="text-2xl font-bold text-black">Railway Parcel Tracking</h1>
+                <p className="text-sm text-slate-700">Track your parcels in real-time</p>
               </div>
             </div>
             <button
@@ -146,10 +146,10 @@ const PublicTracking = () => {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Section */}
-        <div className="card mb-8">
+        <div className="card bg-white border border-mid-gray rounded-2xl p-6 mb-8">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Track Your Parcel</h2>
-            <p className="text-slate-600">Enter your tracking number to get real-time updates</p>
+            <h2 className="text-2xl font-bold text-black mb-2">Track Your Parcel</h2>
+            <p className="text-slate-700">Enter your tracking number to get real-time updates</p>
           </div>
           
           <form onSubmit={(e) => { e.preventDefault(); handleTrackParcel(); }} className="flex gap-4">
@@ -164,10 +164,10 @@ const PublicTracking = () => {
             </div>
             <button
               type="submit"
-              className="btn-primary px-8"
+              className="btn-primary bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-semibold rounded-xl hover:text-white hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
               disabled={loading}
             >
-              <FaSearch className="w-4 h-4 mr-2" />
+              <FaSearch className="w-4 h-4 mr-2 text-black group-hover:text-white transition-colors" />
               Track
             </button>
           </form>
@@ -200,7 +200,7 @@ const PublicTracking = () => {
                   </p>
                 </div>
                 <div className="mt-4 md:mt-0 flex items-center gap-4">
-                  <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(parcel.status)}`}>
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border text-success bg-success/10 border-success">
                     {React.createElement(getStatusIcon(parcel.status), { className: "w-4 h-4 mr-2" })}
                     {parcel.status.replace('_', ' ').toUpperCase()}
                   </span>

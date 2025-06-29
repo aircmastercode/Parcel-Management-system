@@ -272,11 +272,11 @@ const ParcelDetail = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">Parcel {parcel?.tracking_number}</h2>
-            <p className="mt-2 text-gray-600">Track and manage parcel details</p>
+            <h2 className="text-3xl font-bold text-black mb-2">Parcel PMS-{parcel?.tracking_number}</h2>
+            <p className="text-slate-700 mb-6">Track and manage parcel details</p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium border ${getStatusColor(parcel?.status)}`}>
+            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(parcel?.status)}`}>
               {React.createElement(getStatusIcon(parcel?.status), { className: "w-4 h-4 mr-2" })}
               {parcel?.status?.replace('_', ' ').toUpperCase()}
             </span>
@@ -337,8 +337,8 @@ const ParcelDetail = () => {
         <div className="lg:col-span-2 space-y-8">
           {/* Parcel Image */}
           {parcel?.image_url && (
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+              <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
                 <FaCamera className="w-5 h-5 mr-2 text-blue-600" />
                 Parcel Image
               </h3>
@@ -354,8 +354,8 @@ const ParcelDetail = () => {
           
           {/* Image Upload */}
           {!parcel?.image_url && (
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+              <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
                 <FaUpload className="w-5 h-5 mr-2 text-blue-600" />
                 Upload Parcel Image
               </h3>
@@ -372,14 +372,14 @@ const ParcelDetail = () => {
                   <button 
                     onClick={uploadImage}
                     disabled={!image || uploadingImage}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-200"
+                    className="btn-primary bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-semibold rounded-xl hover:text-white hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
                   >
                     {uploadingImage ? 'Uploading...' : 'Upload'}
                   </button>
                 </div>
                 {imagePreview && (
                   <div className="relative">
-                    <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                    <p className="text-sm text-slate-700 mb-2">Preview:</p>
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
@@ -402,8 +402,8 @@ const ParcelDetail = () => {
           )}
 
           {/* Tracking Timeline */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+            <h3 className="text-lg font-semibold text-black mb-6 flex items-center">
               <FaHistory className="w-5 h-5 mr-2 text-blue-600" />
               Tracking Timeline
             </h3>
@@ -423,11 +423,11 @@ const ParcelDetail = () => {
                   </div>
                   <div className="ml-4 flex-1">
                     <p className={`text-sm font-medium ${
-                      step.completed ? 'text-gray-900' : 'text-gray-500'
+                      step.completed ? 'text-black' : 'text-slate-700'
                     }`}>
                       {step.label}
                     </p>
-                    <p className="text-xs text-gray-400">{step.description}</p>
+                    <p className="text-xs text-slate-500">{step.description}</p>
                   </div>
                   {step.current && (
                     <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
@@ -440,8 +440,8 @@ const ParcelDetail = () => {
           </div>
 
           {/* Messages */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+            <h3 className="text-lg font-semibold text-black mb-6 flex items-center">
               <FaEnvelope className="w-5 h-5 mr-2 text-blue-600" />
               Messages
             </h3>
@@ -461,27 +461,27 @@ const ParcelDetail = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center">
-                        <FaUser className="w-4 h-4 text-gray-400 mr-2" />
+                        <FaUser className="w-4 h-4 text-slate-400 mr-2" />
                         <span className="font-medium">{message.sender?.name}</span>
-                        <span className="mx-2 text-gray-400">→</span>
+                        <span className="mx-2 text-slate-400">→</span>
                         <span className="font-medium">{message.receiver?.name}</span>
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-slate-500">
                         {new Date(message.createdAt).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-gray-800">{message.content}</p>
+                    <p className="text-slate-800">{message.content}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-8">No messages yet.</p>
+                <p className="text-slate-500 text-center py-8">No messages yet.</p>
               )}
             </div>
             
             {/* New Message Form */}
             <form onSubmit={handleSendMessage} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Send Message To:
                 </label>
                 <select
@@ -505,7 +505,7 @@ const ParcelDetail = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Message:
                 </label>
                 <textarea
@@ -531,43 +531,43 @@ const ParcelDetail = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Parcel Information */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+            <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
               <FaBox className="w-5 h-5 mr-2 text-blue-600" />
               Parcel Information
             </h3>
             
             <div className="space-y-4">
               <div className="flex items-center">
-                <FaMapMarkerAlt className="w-4 h-4 text-gray-400 mr-3" />
+                <FaMapMarkerAlt className="w-4 h-4 text-slate-400 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500">From</p>
+                  <p className="text-sm text-slate-700">From</p>
                   <p className="font-medium">{parcel?.senderStation?.name}</p>
-                  <p className="text-xs text-gray-400">{parcel?.senderStation?.code}</p>
+                  <p className="text-xs text-slate-500">{parcel?.senderStation?.code}</p>
                 </div>
               </div>
               
               <div className="flex items-center">
-                <FaMapMarkerAlt className="w-4 h-4 text-gray-400 mr-3" />
+                <FaMapMarkerAlt className="w-4 h-4 text-slate-400 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500">To</p>
+                  <p className="text-sm text-slate-700">To</p>
                   <p className="font-medium">{parcel?.receiverStation?.name}</p>
-                  <p className="text-xs text-gray-400">{parcel?.receiverStation?.code}</p>
+                  <p className="text-xs text-slate-500">{parcel?.receiverStation?.code}</p>
                 </div>
               </div>
               
               <div className="flex items-center">
-                <FaWeightHanging className="w-4 h-4 text-gray-400 mr-3" />
+                <FaWeightHanging className="w-4 h-4 text-slate-400 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500">Weight</p>
+                  <p className="text-sm text-slate-700">Weight</p>
                   <p className="font-medium">{parcel?.weight} kg</p>
                 </div>
               </div>
               
               <div className="flex items-center">
-                <FaCalendar className="w-4 h-4 text-gray-400 mr-3" />
+                <FaCalendar className="w-4 h-4 text-slate-400 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500">Created</p>
+                  <p className="text-sm text-slate-700">Created</p>
                   <p className="font-medium">{new Date(parcel?.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -575,19 +575,19 @@ const ParcelDetail = () => {
           </div>
 
           {/* Sender/Receiver Details */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+            <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
               <FaUser className="w-5 h-5 mr-2 text-blue-600" />
               Contact Details
             </h3>
             
             <div className="space-y-6">
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Sender</h4>
+                <h4 className="font-medium text-black mb-2">Sender</h4>
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">{parcel?.sender_name}</p>
+                  <p className="text-sm text-slate-700">{parcel?.sender_name}</p>
                   {parcel?.sender_contact && (
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-slate-700">
                       <FaPhone className="w-3 h-3 mr-2" />
                       {parcel.sender_contact}
                     </div>
@@ -596,11 +596,11 @@ const ParcelDetail = () => {
               </div>
               
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Receiver</h4>
+                <h4 className="font-medium text-black mb-2">Receiver</h4>
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">{parcel?.receiver_name}</p>
+                  <p className="text-sm text-slate-700">{parcel?.receiver_name}</p>
                   {parcel?.receiver_contact && (
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-slate-700">
                       <FaPhone className="w-3 h-3 mr-2" />
                       {parcel.receiver_contact}
                     </div>
@@ -611,8 +611,8 @@ const ParcelDetail = () => {
           </div>
 
           {/* Update Status */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="card bg-white border border-mid-gray rounded-2xl p-4">
+            <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
               <FaEdit className="w-5 h-5 mr-2 text-blue-600" />
               Update Status
             </h3>

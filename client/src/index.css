@@ -150,7 +150,7 @@
   }
   
   .btn-outline {
-    @apply btn bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0;
+    @apply btn bg-white text-black border-blue-500 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0;
   }
   
   .btn-ghost {

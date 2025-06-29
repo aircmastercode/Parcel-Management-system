@@ -134,12 +134,12 @@ const Parcels = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">Parcel Management</h2>
-            <p className="mt-2 text-gray-600">Track and manage all railway parcels</p>
+            <h2 className="text-3xl font-bold text-charcoal">Parcel Management</h2>
+            <p className="mt-2 text-secondary-text">Track and manage all railway parcels</p>
           </div>
           <Link
             to="/parcels/new"
-            className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg"
+            className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-railway-primary to-railway-primary-light text-white font-semibold rounded-xl hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
           >
             <FaPlus className="w-5 h-5 mr-2" />
             New Parcel
@@ -148,17 +148,17 @@ const Parcels = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+      <div className="bg-soft-gray rounded-2xl shadow-lg p-6 mb-8 border border-mid-gray">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="h-5 w-5 text-gray-400" />
+              <FaSearch className="h-5 w-5 text-railway-primary" />
             </div>
             <input
               type="text"
               placeholder="Search parcels..."
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="block w-full pl-10 pr-3 py-3 border border-mid-gray rounded-xl focus:outline-none focus:ring-2 focus:ring-railway-primary focus:border-transparent"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -167,12 +167,12 @@ const Parcels = () => {
           {/* Status Filter */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaFilter className="h-5 w-5 text-gray-400" />
+              <FaFilter className="h-5 w-5 text-railway-primary" />
             </div>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+              className="block w-full pl-10 pr-3 py-3 border border-mid-gray rounded-xl focus:outline-none focus:ring-2 focus:ring-railway-primary focus:border-transparent appearance-none bg-white"
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -185,7 +185,7 @@ const Parcels = () => {
 
           {/* Results Count */}
           <div className="flex items-center justify-center md:justify-end">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-secondary-text">
               {filteredAndSortedParcels.length} of {parcels.length} parcels
             </span>
           </div>
@@ -194,78 +194,78 @@ const Parcels = () => {
 
       {/* Parcels Table */}
       {filteredAndSortedParcels.length > 0 ? (
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-mid-gray">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+            <table className="min-w-full divide-y divide-mid-gray">
+              <thead className="bg-gradient-to-r from-soft-gray to-railway-primary/10">
                 <tr>
                   <th 
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider cursor-pointer hover:bg-soft-gray transition-colors"
                     onClick={() => handleSort('tracking_number')}
                   >
                     <div className="flex items-center">
                       Tracking #
-                      {React.createElement(getSortIcon('tracking_number'), { className: "ml-2 w-4 h-4" })}
+                      {React.createElement(getSortIcon('tracking_number'), { className: "ml-2 w-4 h-4 text-railway-primary" })}
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider cursor-pointer hover:bg-soft-gray transition-colors"
                     onClick={() => handleSort('status')}
                   >
                     <div className="flex items-center">
                       Status
-                      {React.createElement(getSortIcon('status'), { className: "ml-2 w-4 h-4" })}
+                      {React.createElement(getSortIcon('status'), { className: "ml-2 w-4 h-4 text-railway-primary" })}
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider cursor-pointer hover:bg-soft-gray transition-colors"
                     onClick={() => handleSort('senderStation')}
                   >
                     <div className="flex items-center">
                       From
-                      {React.createElement(getSortIcon('senderStation'), { className: "ml-2 w-4 h-4" })}
+                      {React.createElement(getSortIcon('senderStation'), { className: "ml-2 w-4 h-4 text-railway-primary" })}
                     </div>
                   </th>
                   <th 
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider cursor-pointer hover:bg-soft-gray transition-colors"
                     onClick={() => handleSort('receiverStation')}
                   >
                     <div className="flex items-center">
                       To
-                      {React.createElement(getSortIcon('receiverStation'), { className: "ml-2 w-4 h-4" })}
+                      {React.createElement(getSortIcon('receiverStation'), { className: "ml-2 w-4 h-4 text-railway-primary" })}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider">
                     Sender
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider">
                     Receiver
                   </th>
                   <th 
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-6 py-4 text-left text-xs font-bold text-charcoal uppercase tracking-wider cursor-pointer hover:bg-soft-gray transition-colors"
                     onClick={() => handleSort('createdAt')}
                   >
                     <div className="flex items-center">
                       Date
-                      {React.createElement(getSortIcon('createdAt'), { className: "ml-2 w-4 h-4" })}
+                      {React.createElement(getSortIcon('createdAt'), { className: "ml-2 w-4 h-4 text-railway-primary" })}
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-bold text-charcoal uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-mid-gray">
                 {filteredAndSortedParcels.map(parcel => {
                   const StatusIcon = getStatusIcon(parcel.status);
                   return (
-                    <tr key={parcel.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={parcel.id} className="hover:bg-soft-gray transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-railway-primary to-railway-primary-light rounded-lg flex items-center justify-center mr-3">
                             <FaBox className="w-4 h-4 text-white" />
                           </div>
-                          <span className="text-sm font-medium text-gray-900 font-mono">
+                          <span className="text-sm font-medium text-charcoal font-mono">
                             {parcel.tracking_number}
                           </span>
                         </div>
@@ -276,41 +276,41 @@ const Parcels = () => {
                           {parcel.status.replace('_', ' ').toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
                         <div>
                           <div className="font-medium">{parcel.senderStation?.name}</div>
-                          <div className="text-gray-500 text-xs">{parcel.senderStation?.code}</div>
+                          <div className="text-secondary-text text-xs">{parcel.senderStation?.code}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
                         <div>
                           <div className="font-medium">{parcel.receiverStation?.name}</div>
-                          <div className="text-gray-500 text-xs">{parcel.receiverStation?.code}</div>
+                          <div className="text-secondary-text text-xs">{parcel.receiverStation?.code}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
                         <div>
                           <div className="font-medium">{parcel.sender_name}</div>
                           {parcel.sender_contact && (
-                            <div className="text-gray-500 text-xs">{parcel.sender_contact}</div>
+                            <div className="text-secondary-text text-xs">{parcel.sender_contact}</div>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
                         <div>
                           <div className="font-medium">{parcel.receiver_name}</div>
                           {parcel.receiver_contact && (
-                            <div className="text-gray-500 text-xs">{parcel.receiver_contact}</div>
+                            <div className="text-secondary-text text-xs">{parcel.receiver_contact}</div>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-text">
                         {new Date(parcel.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link 
                           to={`/parcel/${parcel.id}`} 
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-railway-primary bg-railway-primary/10 hover:bg-railway-primary/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-railway-primary transition-colors"
                         >
                           <FaEye className="w-4 h-4 mr-1" />
                           View
@@ -324,10 +324,10 @@ const Parcels = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-          <FaBox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No parcels found</h3>
-          <p className="text-gray-500 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-mid-gray">
+          <FaBox className="w-16 h-16 text-mid-gray mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-charcoal mb-2">No parcels found</h3>
+          <p className="text-secondary-text mb-6">
             {searchQuery || filter !== 'all' 
               ? 'Try adjusting your search or filter criteria.'
               : 'Create a new parcel to get started.'
@@ -335,7 +335,7 @@ const Parcels = () => {
           </p>
           <Link 
             to="/parcels/new" 
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-railway-primary to-railway-primary-light text-white font-semibold rounded-xl hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
           >
             <FaPlus className="w-5 h-5 mr-2" />
             Create New Parcel

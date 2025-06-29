@@ -102,15 +102,15 @@ const AdminLogin = () => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 17.25h15a.75.75 0 00.75-.75V6.75A2.25 2.25 0 0018 4.5H6A2.25 2.25 0 003.75 6.75v9.75c0 .414.336.75.75.75z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-1 text-center">
+        <h1 className="text-3xl font-extrabold text-black mb-1 text-center">
           Admin Portal
         </h1>
-        <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mb-2 mx-auto" />
-        <p className="text-slate-500 text-center text-base">Railway Parcel Management System</p>
+        <div className="w-24 h-1 bg-gradient-to-r from-railway-primary to-railway-primary-light rounded-full mb-2 mx-auto" />
+        <p className="text-slate-700 text-center text-base">Railway Parcel Management System</p>
       </div>
 
       {/* Glassmorphism Card */}
-      <div className="bg-white/70 backdrop-blur-lg shadow-2xl shadow-blue-100/40 border border-white/40 rounded-3xl px-4 py-8 w-full max-w-md sm:px-8 sm:py-10 animate-fade-in-up transition-all duration-500">
+      <div className="bg-white/80 backdrop-blur-lg shadow-2xl shadow-blue-100/40 border border-mid-gray rounded-3xl px-4 py-8 w-full max-w-md sm:px-8 sm:py-10 animate-fade-in-up transition-all duration-500">
         {loading ? (
           <LoadingSpinner />
         ) : !otpSent ? (
@@ -134,7 +134,7 @@ const AdminLogin = () => {
             <div className="mt-6">
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold text-lg shadow-lg hover:from-blue-700 hover:to-blue-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-200/50 transition-all duration-200"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-bold text-lg shadow-lg hover:from-railway-primary-dark hover:to-railway-primary hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-railway-primary/50 transition-all duration-200"
               >
                 Send OTP
               </button>
@@ -163,7 +163,7 @@ const AdminLogin = () => {
             <div className="mt-6">
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold text-lg shadow-lg hover:from-blue-700 hover:to-blue-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-200/50 transition-all duration-200"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-bold text-lg shadow-lg hover:from-railway-primary-dark hover:to-railway-primary hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-railway-primary/50 transition-all duration-200"
               >
                 Verify OTP
               </button>
@@ -171,7 +171,7 @@ const AdminLogin = () => {
             <div className="mt-4">
               <button
                 type="button"
-                className="w-full btn-outline rounded-xl"
+                className="w-full btn-outline rounded-xl text-black border-2 border-blue-500"
                 onClick={handleSendOTP}
               >
                 Resend OTP
@@ -193,7 +193,7 @@ const AdminLogin = () => {
           <div className="mt-6">
             <button
               type="button"
-              className="w-full btn-outline rounded-xl"
+              className="w-full btn-outline rounded-xl text-black border-2 border-blue-500"
               onClick={() => navigate('/login')}
             >
               Go to Station Login
