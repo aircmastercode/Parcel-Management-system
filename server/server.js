@@ -54,23 +54,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Import seeder
-const seedDatabase = require('./utils/seeder');
-
-// Sync database and start server
-sequelize.sync({ force: process.env.NODE_ENV === 'development' })
-  .then(async () => {
-    console.log('Database synced');
-    
-    // Seed database in development mode
-    if (process.env.NODE_ENV === 'development') {
-      await seedDatabase();
-    }
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Failed to sync database:', error);
-  }); 
+// Start server directly - database initialization is handled by startup.js
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+}); 
