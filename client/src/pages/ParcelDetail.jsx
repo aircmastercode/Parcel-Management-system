@@ -272,8 +272,8 @@ const ParcelDetail = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-black mb-2">Parcel PMS-{parcel?.tracking_number}</h2>
-            <p className="text-slate-700 mb-6">Track and manage parcel details</p>
+            <h2 className="text-3xl font-bold text-palette-dark mb-2">Parcel PMS-{parcel?.tracking_number}</h2>
+            <p className="text-palette-mid mb-6">Track and manage parcel details</p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center space-x-3">
             <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(parcel?.status)}`}>
@@ -372,7 +372,7 @@ const ParcelDetail = () => {
                   <button 
                     onClick={uploadImage}
                     disabled={!image || uploadingImage}
-                    className="btn-primary bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-semibold rounded-xl hover:text-white hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
+                    className="btn-primary bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-semibold rounded-xl hover:from-railway-primary-dark hover:to-railway-primary focus:outline-none focus:ring-2 focus:ring-railway-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
                   >
                     {uploadingImage ? 'Uploading...' : 'Upload'}
                   </button>

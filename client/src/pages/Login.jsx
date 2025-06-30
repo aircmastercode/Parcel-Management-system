@@ -148,39 +148,40 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-beige">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-palette-light">
       {/* Animated Icon and Title */}
-      <div className="flex flex-col items-center mb-8 animate-fade-in">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center shadow-lg mb-4 transition-transform duration-300 hover:scale-110">
+      <div className="flex flex-col items-center animate-fade-in mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-palette-mid to-palette-dark flex items-center justify-center shadow-lg mb-3 transition-transform duration-300 hover:scale-110">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-9 h-9">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 17.25h15a.75.75 0 00.75-.75V6.75A2.25 2.25 0 0018 4.5H6A2.25 2.25 0 003.75 6.75v9.75c0 .414.336.75.75.75z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-1 text-center">
+        <h1 className="text-3xl font-extrabold text-palette-dark mb-0 text-center">
           Railway Parcel Management
         </h1>
-        <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mb-2 mx-auto" />
-        <p className="text-slate-500 text-center text-base">Sign in to your station account</p>
+        <div className="w-24 h-1 bg-gradient-to-r from-palette-mid to-palette-dark rounded-full mt-2 mb-1 mx-auto" />
+        <p className="text-palette-mid text-center text-base mb-2">Sign in to your station account</p>
       </div>
+      <div className="mb-6" />
 
       {/* Glassmorphism Card */}
-      <div className="bg-white/70 backdrop-blur-lg shadow-2xl border border-slate-100 rounded-3xl px-8 py-10 w-full max-w-md animate-fade-in-up transition-all duration-500">
+      <div className="bg-white/90 backdrop-blur-lg shadow-2xl border border-palette-mid rounded-3xl px-8 py-10 w-full max-w-md animate-fade-in-up transition-all duration-500">
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 animate-slide-down">
+          <div className="bg-palette-beige border border-palette-mid rounded-2xl p-4 animate-slide-down">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <FaShieldAlt className="h-5 w-5 text-red-400" />
+                <FaShieldAlt className="h-5 w-5 text-palette-dark" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">{error}</p>
+                <p className="text-sm font-medium text-palette-dark">{error}</p>
               </div>
             </div>
             {stationsError && (
-              <div className="mt-3 pt-3 border-t border-red-200">
+              <div className="mt-3 pt-3 border-t border-palette-mid">
                 <button
                   onClick={handleClearSession}
-                  className="btn-outline text-red-600 border-red-300 hover:bg-red-50 text-sm"
+                  className="btn-outline text-palette-dark border-palette-mid hover:bg-palette-beige text-sm"
                 >
                   <FaRedo className="w-4 h-4 mr-2" />
                   Clear Session & Retry
@@ -196,7 +197,7 @@ const Login = () => {
             <form className="space-y-6" onSubmit={handleSendOTP}>
               <div>
                 <label htmlFor="email" className="form-label flex items-center">
-                  <FaEnvelope className="w-4 h-4 mr-2 text-blue-600" />
+                  <FaEnvelope className="w-4 h-4 mr-2 text-palette-dark" />
                   Email Address
                 </label>
                 <input
@@ -204,7 +205,7 @@ const Login = () => {
                   name="email"
                   type="email"
                   required
-                  className="form-input rounded-xl bg-white/80 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none shadow-sm transition-all duration-200"
+                  className="form-input rounded-xl bg-white border border-palette-mid focus:border-palette-dark focus:ring-2 focus:ring-palette-dark/20 focus:outline-none shadow-sm transition-all duration-200"
                   placeholder="Enter your station email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -214,17 +215,17 @@ const Login = () => {
 
               <div>
                 <label htmlFor="station" className="form-label flex items-center">
-                  <FaBuilding className="w-4 h-4 mr-2 text-green-600" />
+                  <FaBuilding className="w-4 h-4 mr-2 text-palette-dark" />
                   Railway Station
                 </label>
                 
                 {stationsLoading ? (
                   <div className="form-input flex items-center justify-center py-4">
                     <LoadingSpinner size="small" />
-                    <span className="ml-2 text-slate-500">Loading stations...</span>
+                    <span className="ml-2 text-palette-mid">Loading stations...</span>
                   </div>
                 ) : stationsError ? (
-                  <div className="form-input bg-red-50 border-red-200 text-red-700 flex items-center">
+                  <div className="form-input bg-palette-beige border-palette-mid text-palette-dark flex items-center">
                     <FaShieldAlt className="w-4 h-4 mr-2" />
                     {stationsError}
                   </div>
@@ -233,7 +234,7 @@ const Login = () => {
                     id="station"
                     name="station"
                     required
-                    className="form-input rounded-xl bg-white/80 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none shadow-sm transition-all duration-200"
+                    className="form-input rounded-xl bg-white border border-palette-mid focus:border-palette-dark focus:ring-2 focus:ring-palette-dark/20 focus:outline-none shadow-sm transition-all duration-200"
                     value={selectedStation}
                     onChange={(e) => setSelectedStation(e.target.value)}
                     disabled={loading}
@@ -248,7 +249,7 @@ const Login = () => {
                 )}
                 
                 {stations.length > 0 && (
-                  <div className="mt-2 text-xs text-slate-500 flex items-center">
+                  <div className="mt-2 text-xs text-palette-mid flex items-center">
                     <FaMapMarkerAlt className="w-3 h-3 mr-1" />
                     {stations.length} railway stations available
                   </div>
@@ -258,7 +259,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading || stationsLoading || stationsError}
-                className="btn-primary w-full py-3 text-base font-semibold rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg hover:from-blue-700 hover:to-blue-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                className="w-full py-3 text-base font-semibold rounded-2xl bg-palette-beige text-palette-dark shadow-lg hover:bg-palette-mid hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-palette-dark focus:ring-offset-2 transition-all duration-200"
               >
                 {loading ? (
                   <>
@@ -276,18 +277,18 @@ const Login = () => {
           ) : (
             <form className="space-y-6" onSubmit={handleVerifyOTP}>
               <div className="text-center">
-                <div className="w-16 h-16 gradient-railway-success rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <FaEnvelope className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-palette-beige to-palette-mid rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <FaEnvelope className="w-8 h-8 text-palette-dark" />
                 </div>
-                <p className="text-slate-700 font-medium">
+                <p className="text-palette-dark font-medium">
                   We've sent a verification code to
                 </p>
-                <p className="text-blue-600 font-bold">{email}</p>
+                <p className="text-palette-dark font-bold">{email}</p>
               </div>
 
               <div>
                 <label htmlFor="otp" className="form-label flex items-center justify-center">
-                  <FaShieldAlt className="w-4 h-4 mr-2 text-green-600" />
+                  <FaShieldAlt className="w-4 h-4 mr-2 text-palette-dark" />
                   Verification Code
                 </label>
                 <input
@@ -296,7 +297,7 @@ const Login = () => {
                   type="text"
                   required
                   maxLength="6"
-                  className="form-input text-center text-2xl font-bold tracking-widest rounded-xl bg-white/80 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none shadow-sm transition-all duration-200"
+                  className="form-input text-center text-2xl font-bold tracking-widest rounded-xl bg-white border border-palette-mid focus:border-palette-dark focus:ring-2 focus:ring-palette-dark/20 focus:outline-none shadow-sm transition-all duration-200"
                   placeholder="000000"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -307,9 +308,9 @@ const Login = () => {
 
               {timeLeft > 0 && (
                 <div className="text-center">
-                  <div className="inline-flex items-center px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                    <FaClock className="w-4 h-4 text-amber-600 mr-2" />
-                    <span className="text-amber-700 font-medium">
+                  <div className="inline-flex items-center px-4 py-2 bg-palette-beige border border-palette-mid rounded-xl">
+                    <FaClock className="w-4 h-4 text-palette-dark mr-2" />
+                    <span className="text-palette-dark font-medium">
                       Code expires in {formatTime(timeLeft)}
                     </span>
                   </div>
@@ -320,7 +321,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="btn-primary w-full py-3 text-base font-semibold rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg hover:from-blue-700 hover:to-blue-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                  className="w-full py-3 text-base font-semibold rounded-2xl bg-palette-beige text-palette-dark shadow-lg hover:bg-palette-mid hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-palette-dark focus:ring-offset-2 transition-all duration-200"
                 >
                   {loading ? (
                     <>
@@ -366,12 +367,12 @@ const Login = () => {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-palette-mid">
             Need help? Contact your station administrator
           </p>
-          <div className="mt-4 flex items-center justify-center space-x-4 text-xs text-slate-400">
+          <div className="mt-4 flex items-center justify-center space-x-4 text-xs text-palette-mid">
             <div className="flex items-center">
-              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              <div className="w-2 h-2 bg-palette-dark rounded-full mr-2 animate-pulse"></div>
               System Online
             </div>
             <div className="flex items-center">

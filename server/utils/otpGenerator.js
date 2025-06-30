@@ -32,26 +32,121 @@ const sendOTPViaGmail = async (email, otp) => {
     });
 
     const mailOptions = {
-      from: '"Railway Parcel Management" <crisrailwayhead@gmail.com>',
+      from: '"Railway Parcel Management System" <crisrailwayhead@gmail.com>',
       to: email,
-      subject: 'Railway Parcel Management - OTP Code',
-      text: `Your OTP code for Railway Parcel Management System is: ${otp}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.`,
+      subject: 'Railway Parcel Management - Secure Access Code',
+      text: `Dear Valued Customer,
+    
+    Your One-Time Password (OTP) for the Railway Parcel Management System is: ${otp}
+    
+    This secure access code will expire in 10 minutes for your protection.
+    
+    Please enter this code to complete your authentication and access your parcel management services.
+    
+    If you did not request this code, please disregard this email and contact our support team if you have any concerns.
+    
+    Best regards,
+    Railway Parcel Management System Team
+    
+    ---
+    System developed by Tanush Singhal
+    For technical support, please contact our helpdesk.`,
+      
       html: `
         <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #2c3e50; text-align: center;">🚂 Railway Parcel Management System</h2>
-              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #2c3e50; margin-top: 0;">Your OTP Code</h3>
-                <div style="background-color: #fff; padding: 15px; border: 2px solid #3498db; border-radius: 5px; text-align: center; margin: 15px 0;">
-                  <span style="font-size: 24px; font-weight: bold; color: #3498db; letter-spacing: 3px;">${otp}</span>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Railway Parcel Management - OTP Verification</title>
+          </head>
+          <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9;">
+            <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff;">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 30px 20px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600;">
+                  🚂 Railway Parcel Management System
+                </h1>
+                <p style="color: #e8f4f8; margin: 8px 0 0 0; font-size: 16px;">Secure • Reliable • Efficient</p>
+              </div>
+    
+              <!-- Main Content -->
+              <div style="padding: 40px 30px;">
+                <h2 style="color: #2c3e50; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+                  Secure Access Code
+                </h2>
+                
+                <p style="color: #5a6c7d; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                  Dear Valued Customer,<br><br>
+                  Your One-Time Password (OTP) has been generated for secure access to your Railway Parcel Management account.
+                </p>
+    
+                <!-- OTP Box -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2px; border-radius: 12px; margin: 30px 0;">
+                  <div style="background-color: #ffffff; padding: 25px; border-radius: 10px; text-align: center;">
+                    <p style="color: #5a6c7d; font-size: 14px; margin: 0 0 10px 0; font-weight: 500;">YOUR OTP CODE</p>
+                    <div style="font-size: 36px; font-weight: bold; color: #2c3e50; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                      ${otp}
+                    </div>
+                    <p style="color: #e74c3c; font-size: 14px; margin: 15px 0 0 0; font-weight: 500;">
+                      ⏰ Expires in 10 minutes
+                    </p>
+                  </div>
                 </div>
-                <p style="margin-bottom: 10px;"><strong>This code will expire in 10 minutes.</strong></p>
-                <p style="color: #7f8c8d; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+    
+                <!-- Instructions -->
+                <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border-left: 4px solid #3498db; margin: 30px 0;">
+                  <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 18px;">Instructions:</h3>
+                  <ul style="color: #5a6c7d; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li>Enter this code in the verification field to complete your authentication</li>
+                    <li>This code is valid for 10 minutes from the time it was sent</li>
+                    <li>Do not share this code with anyone for security purposes</li>
+                    <li>If you did not request this code, please ignore this email</li>
+                  </ul>
+                </div>
+    
+                <!-- Security Notice -->
+                <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 30px 0;">
+                  <p style="color: #856404; font-size: 14px; margin: 0; line-height: 1.5;">
+                    <strong>🔒 Security Notice:</strong> Railway Parcel Management System will never ask for your OTP via phone or email. 
+                    If you receive suspicious communications, please contact our support team immediately.
+                  </p>
+                </div>
+    
+                <p style="color: #5a6c7d; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+                  Thank you for using Railway Parcel Management System. We're committed to providing you with secure and efficient parcel management services.
+                </p>
+    
+                <p style="color: #2c3e50; font-size: 16px; margin-top: 25px;">
+                  Best regards,<br>
+                  <strong>Railway Parcel Management System Team</strong>
+                </p>
               </div>
-              <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
-                <p style="color: #7f8c8d; font-size: 12px;">Railway Parcel Management System</p>
+    
+              <!-- Footer -->
+              <div style="background-color: #2c3e50; padding: 25px 30px; text-align: center;">
+                <p style="color: #bdc3c7; font-size: 14px; margin: 0 0 10px 0;">
+                  Railway Parcel Management System
+                </p>
+                <p style="color: #7f8c8d; font-size: 12px; margin: 0 0 15px 0;">
+                  Connecting people through reliable parcel services across the railway network
+                </p>
+                
+                <!-- Developer Credit -->
+                <div style="border-top: 1px solid #34495e; padding-top: 15px; margin-top: 15px;">
+                  <p style="color: #95a5a6; font-size: 11px; margin: 0;">
+                    System developed by <strong style="color: #3498db;">Tanush Singhal</strong>
+                  </p>
+                  <p style="color: #7f8c8d; font-size: 11px; margin: 5px 0 0 0;">
+                    For technical support, please contact our helpdesk
+                  </p>
+                </div>
               </div>
+            </div>
+    
+            <!-- Email client compatibility -->
+            <div style="font-size: 1px; line-height: 1px; color: #f4f6f9; margin-top: 20px;">
+              &nbsp;
             </div>
           </body>
         </html>

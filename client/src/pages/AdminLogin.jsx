@@ -94,23 +94,23 @@ const AdminLogin = () => {
   const timeRemaining = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-beige">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-palette-light">
       {/* Animated Icon and Title */}
       <div className="flex flex-col items-center mb-8 animate-fade-in-down">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center shadow-lg mb-4 transition-transform duration-300 hover:scale-110">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-palette-mid to-palette-dark flex items-center justify-center shadow-lg mb-4 transition-transform duration-300 hover:scale-110">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-9 h-9">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 17.25h15a.75.75 0 00.75-.75V6.75A2.25 2.25 0 0018 4.5H6A2.25 2.25 0 003.75 6.75v9.75c0 .414.336.75.75.75z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-extrabold text-black mb-1 text-center">
+        <h1 className="text-3xl font-extrabold text-palette-dark mb-1 text-center">
           Admin Portal
         </h1>
-        <div className="w-24 h-1 bg-gradient-to-r from-railway-primary to-railway-primary-light rounded-full mb-2 mx-auto" />
-        <p className="text-slate-700 text-center text-base">Railway Parcel Management System</p>
+        <div className="w-24 h-1 bg-gradient-to-r from-palette-mid to-palette-dark rounded-full mb-2 mx-auto" />
+        <p className="text-palette-mid text-center text-base">Railway Parcel Management System</p>
       </div>
 
       {/* Glassmorphism Card */}
-      <div className="bg-white/80 backdrop-blur-lg shadow-2xl shadow-blue-100/40 border border-mid-gray rounded-3xl px-4 py-8 w-full max-w-md sm:px-8 sm:py-10 animate-fade-in-up transition-all duration-500">
+      <div className="bg-white/90 backdrop-blur-lg shadow-2xl border border-palette-mid rounded-3xl px-4 py-8 w-full max-w-md sm:px-8 sm:py-10 animate-fade-in-up transition-all duration-500">
         {loading ? (
           <LoadingSpinner />
         ) : !otpSent ? (
@@ -125,7 +125,7 @@ const AdminLogin = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="form-input rounded-xl bg-white/80 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none shadow-sm transition-all duration-200"
+                className="form-input rounded-xl bg-white border border-palette-mid focus:border-palette-dark focus:ring-2 focus:ring-palette-dark/20 focus:outline-none shadow-sm transition-all duration-200"
                 placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -134,7 +134,7 @@ const AdminLogin = () => {
             <div className="mt-6">
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-bold text-lg shadow-lg hover:from-railway-primary-dark hover:to-railway-primary hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-railway-primary/50 transition-all duration-200"
+                className="w-full py-3 rounded-2xl bg-palette-beige text-palette-dark font-bold text-lg shadow-lg hover:bg-palette-mid hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-palette-dark/20 transition-all duration-200"
               >
                 Send OTP
               </button>
@@ -151,19 +151,19 @@ const AdminLogin = () => {
                 name="otp"
                 type="text"
                 required
-                className="form-input rounded-xl bg-white/80 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:outline-none shadow-sm transition-all duration-200"
+                className="form-input rounded-xl bg-white border border-palette-mid focus:border-palette-dark focus:ring-2 focus:ring-palette-dark/20 focus:outline-none shadow-sm transition-all duration-200"
                 placeholder="Enter the OTP sent to your email"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
               />
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-palette-mid">
                 OTP expires in {timeRemaining}
               </p>
             </div>
             <div className="mt-6">
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-railway-primary to-railway-primary-light text-black font-bold text-lg shadow-lg hover:from-railway-primary-dark hover:to-railway-primary hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-railway-primary/50 transition-all duration-200"
+                className="w-full py-3 rounded-2xl bg-palette-beige text-palette-dark font-bold text-lg shadow-lg hover:bg-palette-mid hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-palette-dark/20 transition-all duration-200"
               >
                 Verify OTP
               </button>
@@ -171,7 +171,7 @@ const AdminLogin = () => {
             <div className="mt-4">
               <button
                 type="button"
-                className="w-full btn-outline rounded-xl text-black border-2 border-blue-500"
+                className="w-full btn-outline rounded-xl"
                 onClick={handleSendOTP}
               >
                 Resend OTP
@@ -182,10 +182,10 @@ const AdminLogin = () => {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-palette-mid"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="px-2 bg-white text-palette-mid">
                 Not an admin?
               </span>
             </div>
@@ -193,7 +193,7 @@ const AdminLogin = () => {
           <div className="mt-6">
             <button
               type="button"
-              className="w-full btn-outline rounded-xl text-black border-2 border-blue-500"
+              className="w-full btn-outline rounded-xl"
               onClick={() => navigate('/login')}
             >
               Go to Station Login
