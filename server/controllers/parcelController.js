@@ -3,6 +3,36 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
 
+// Get public URL from env or default
+const PUBLIC_URL = process.env.PUBLIC_URL || 'http://localhost:8000';
+
+// Helper function to generate full image URL
+const getFullImageUrl = (relativePath) => {
+  if (!relativePath) return null;
+  if (relativePath.startsWith('http')) return relativePath;
+  return `${PUBLIC_URL}${relativePath}`;
+};
+
+// Helper function to ensure all parcels have full image URLs
+const addFullImageUrlsToParcels = (parcels) => {
+  if (!parcels) return null;
+  
+  if (Array.isArray(parcels)) {
+    return parcels.map(parcel => {
+      if (parcel.image_url) {
+        parcel.image_url = getFullImageUrl(parcel.image_url);
+      }
+      return parcel;
+    });
+  } else {
+    // Single parcel object
+    if (parcels.image_url) {
+      parcels.image_url = getFullImageUrl(parcels.image_url);
+    }
+    return parcels;
+  }
+};
+
 // Public parcel tracking (no authentication required)
 exports.trackParcel = async (req, res) => {
   try {
@@ -43,7 +73,7 @@ exports.trackParcel = async (req, res) => {
       updatedAt: parcel.updatedAt,
       senderStation: parcel.senderStation,
       receiverStation: parcel.receiverStation,
-      image_url: parcel.image_url
+      image_url: getFullImageUrl(parcel.image_url)
     });
   } catch (error) {
     console.error('Error tracking parcel:', error);
@@ -69,7 +99,16 @@ exports.getParcels = async (req, res) => {
       ]
     });
     
-    res.status(200).json(parcels);
+    // Convert each parcel to a plain object and update image URLs
+    const parcelsData = parcels.map(parcel => {
+      const data = parcel.get({ plain: true });
+      if (data.image_url) {
+        data.image_url = getFullImageUrl(data.image_url);
+      }
+      return data;
+    });
+    
+    res.status(200).json(parcelsData);
   } catch (error) {
     console.error('Error getting parcels:', error);
     res.status(500).json({ message: 'Server error' });
@@ -114,7 +153,23 @@ exports.getParcelById = async (req, res) => {
       return res.status(404).json({ message: 'Parcel not found' });
     }
     
-    res.status(200).json(parcel);
+    // Convert the parcel to a plain object so we can modify it
+    const parcelData = parcel.get({ plain: true });
+    
+    // Add full URL to image_url if it exists
+    if (parcelData.image_url) {
+      parcelData.image_url = getFullImageUrl(parcelData.image_url);
+      console.log('DEBUG: getParcelById modified image_url to:', parcelData.image_url);
+    } else {
+      console.log('DEBUG: getParcelById - parcel has no image_url');
+    }
+    
+    // Log all messages for debugging
+    if (parcelData.messages && parcelData.messages.length > 0) {
+      console.log(`DEBUG: Parcel ${parcelData.id} has ${parcelData.messages.length} messages`);
+    }
+    
+    res.status(200).json(parcelData);
   } catch (error) {
     console.error('Error getting parcel:', error);
     res.status(500).json({ message: 'Server error' });
@@ -154,7 +209,19 @@ exports.getParcelsByStation = async (req, res) => {
       ]
     });
     
-    res.status(200).json(parcels);
+    // Convert each parcel to a plain object and update image URLs
+    const parcelsData = parcels.map(parcel => {
+      const data = parcel.get({ plain: true });
+      if (data.image_url) {
+        data.image_url = getFullImageUrl(data.image_url);
+        console.log(`DEBUG: Parcel ${data.id} (${data.tracking_number}) has image URL: ${data.image_url}`);
+      } else {
+        console.log(`DEBUG: Parcel ${data.id} (${data.tracking_number}) has no image URL`);
+      }
+      return data;
+    });
+    
+    res.status(200).json(parcelsData);
   } catch (error) {
     console.error('Error getting station parcels:', error);
     res.status(500).json({ message: 'Server error' });
@@ -195,9 +262,14 @@ exports.uploadParcelImage = async (req, res) => {
     parcel.image_url = imageUrl;
     await parcel.save();
     
+    // Debug log
+    console.log('DEBUG: Image saved with path:', imageUrl);
+    console.log('DEBUG: Full file path:', uploadPath);
+    console.log('DEBUG: Full public URL:', getFullImageUrl(imageUrl));
+    
     res.status(200).json({ 
       message: 'Image uploaded successfully', 
-      image_url: imageUrl 
+      image_url: getFullImageUrl(imageUrl)
     });
   } catch (error) {
     console.error('Error uploading parcel image:', error);
@@ -280,6 +352,7 @@ exports.createParcel = async (req, res) => {
       await newParcel.save();
       // Debug: Log image URL
       console.log('DEBUG: Image uploaded and saved at', imageUrl);
+      console.log('DEBUG: Full file path:', uploadPath);
     } else {
       console.log('DEBUG: No image uploaded with parcel creation.');
     }
@@ -320,9 +393,17 @@ exports.createParcel = async (req, res) => {
         }
       ]
     });
+    
+    // Convert the parcel to a plain object and update image URL
+    const parcelData = parcelWithRelations.get({ plain: true });
+    if (parcelData.image_url) {
+      parcelData.image_url = getFullImageUrl(parcelData.image_url);
+      console.log('DEBUG: Converted image URL to:', parcelData.image_url);
+    }
+    
     // Debug: Log what is returned
-    console.log('DEBUG: Returning parcel:', parcelWithRelations);
-    res.status(201).json(parcelWithRelations);
+    console.log('DEBUG: Returning parcel:', parcelData);
+    res.status(201).json(parcelData);
   } catch (error) {
     console.error('Error creating parcel:', error);
     res.status(500).json({ message: 'Server error' });

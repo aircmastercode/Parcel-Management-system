@@ -17,6 +17,9 @@ const app = express();
 // Always use port 8000
 const PORT = 8000;
 
+// Get public URL from env or default
+const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,6 +32,12 @@ app.use(fileUpload({
 
 // Set up static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Add middleware to add public URL to response locals
+app.use((req, res, next) => {
+  res.locals.publicUrl = PUBLIC_URL;
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -57,4 +66,5 @@ if (process.env.NODE_ENV === 'production') {
 // Start server directly - database initialization is handled by startup.js
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Public URL: ${PUBLIC_URL}`);
 }); 

@@ -69,6 +69,7 @@ const ParcelDetail = () => {
       
       // Debug: Log image_url
       console.log('DEBUG: ParcelDetail loaded, image_url:', parcelResponse.data.image_url);
+      console.log('DEBUG: backendBaseUrl used for image:', backendBaseUrl);
       // Set default target station
       if (currentUser.station_id === parcelResponse.data.sender_station_id) {
         setTargetStation(parcelResponse.data.receiver_station_id);
@@ -348,10 +349,15 @@ const ParcelDetail = () => {
                 Parcel Image
               </h3>
               <div className="flex justify-center">
+                {console.log('DEBUG: Rendering image with URL:', parcel.image_url.startsWith('http') ? parcel.image_url : `${backendBaseUrl}${parcel.image_url}`)}
                 <img 
                   src={parcel.image_url.startsWith('http') ? parcel.image_url : `${backendBaseUrl}${parcel.image_url}`} 
                   alt="Parcel" 
                   className="max-h-96 rounded-xl shadow-md"
+                  onError={(e) => {
+                    console.error('Image failed to load:', e);
+                    e.target.style.display = 'none';
+                  }}
                 />
               </div>
             </div>

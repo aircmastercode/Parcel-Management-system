@@ -18,11 +18,12 @@ services:
     volumes:
       - ./server:/app
       - db-data:/app/data
-      - ./server/uploads:/app/server/uploads
+      - uploads-data:/app/uploads
     environment:
       - PORT=8000
       - NODE_ENV=development
       - JWT_SECRET=your_jwt_secret_key
+      - PUBLIC_URL=http://localhost:8000
     networks:
       - app-network
 
@@ -43,10 +44,12 @@ services:
     networks:
       - app-network
     environment:
-      - VITE_API_URL=http://server:8000
+      - VITE_API_URL=http://localhost:8000
 
 volumes:
   db-data:
+    driver: local
+  uploads-data:
     driver: local
 
 networks:
