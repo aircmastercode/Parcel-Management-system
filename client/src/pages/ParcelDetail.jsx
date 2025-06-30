@@ -47,6 +47,9 @@ const ParcelDetail = () => {
   const [showQRCode, setShowQRCode] = useState(false);
   const fileInputRef = useRef(null);
   
+  // Get backend base URL from env or default
+  const backendBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  
   useEffect(() => {
     loadParcelData();
     loadStations();
@@ -64,6 +67,8 @@ const ParcelDetail = () => {
         setMessages(parcelResponse.data.messages);
       }
       
+      // Debug: Log image_url
+      console.log('DEBUG: ParcelDetail loaded, image_url:', parcelResponse.data.image_url);
       // Set default target station
       if (currentUser.station_id === parcelResponse.data.sender_station_id) {
         setTargetStation(parcelResponse.data.receiver_station_id);
@@ -344,7 +349,7 @@ const ParcelDetail = () => {
               </h3>
               <div className="flex justify-center">
                 <img 
-                  src={parcel.image_url} 
+                  src={parcel.image_url.startsWith('http') ? parcel.image_url : `${backendBaseUrl}${parcel.image_url}`} 
                   alt="Parcel" 
                   className="max-h-96 rounded-xl shadow-md"
                 />

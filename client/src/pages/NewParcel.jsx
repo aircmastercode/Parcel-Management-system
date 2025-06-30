@@ -156,6 +156,11 @@ const NewParcel = () => {
         }
       });
       
+      // Debug: Log API response
+      console.log('DEBUG: Parcel creation API response:', response.data);
+      if (response.data.image_url) {
+        console.log('DEBUG: image_url in response:', response.data.image_url);
+      }
       toast.success('Parcel created successfully');
       
       // Navigate to parcel detail page

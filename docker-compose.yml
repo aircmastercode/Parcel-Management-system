@@ -18,6 +18,7 @@ services:
     volumes:
       - ./server:/app
       - db-data:/app/data
+      - ./server/uploads:/app/server/uploads
     environment:
       - PORT=8000
       - NODE_ENV=development

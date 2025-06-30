@@ -256,7 +256,8 @@ exports.createParcel = async (req, res) => {
       status: 'pending'
     });
     
-    // Handle image upload if included in the request
+    // Debug: Log file upload info
+    console.log('DEBUG: req.files:', req.files);
     if (req.files && req.files.image) {
       const imageFile = req.files.image;
       const uploadDir = path.join(__dirname, '../uploads/parcels');
@@ -277,6 +278,10 @@ exports.createParcel = async (req, res) => {
       const imageUrl = `/uploads/parcels/${uniqueFileName}`;
       newParcel.image_url = imageUrl;
       await newParcel.save();
+      // Debug: Log image URL
+      console.log('DEBUG: Image uploaded and saved at', imageUrl);
+    } else {
+      console.log('DEBUG: No image uploaded with parcel creation.');
     }
     
     // Create messages for all stations
@@ -315,7 +320,8 @@ exports.createParcel = async (req, res) => {
         }
       ]
     });
-    
+    // Debug: Log what is returned
+    console.log('DEBUG: Returning parcel:', parcelWithRelations);
     res.status(201).json(parcelWithRelations);
   } catch (error) {
     console.error('Error creating parcel:', error);

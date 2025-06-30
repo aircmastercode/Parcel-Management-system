@@ -35,22 +35,26 @@ const sendOTPViaGmail = async (email, otp) => {
       from: '"Railway Parcel Management System" <crisrailwayhead@gmail.com>',
       to: email,
       subject: 'Railway Parcel Management - Secure Access Code',
-      text: `Dear Valued Customer,
-    
-    Your One-Time Password (OTP) for the Railway Parcel Management System is: ${otp}
-    
-    This secure access code will expire in 10 minutes for your protection.
-    
-    Please enter this code to complete your authentication and access your parcel management services.
-    
-    If you did not request this code, please disregard this email and contact our support team if you have any concerns.
-    
-    Best regards,
-    Railway Parcel Management System Team
-    
-    ---
-    System developed by Tanush Singhal
-    For technical support, please contact our helpdesk.`,
+      text: `Dear Valued User,
+
+Thank you for using the Railway Parcel Management System.
+
+Your One-Time Password (OTP) for secure access is: ${otp}
+
+This code is confidential and will expire in 10 minutes for your security.
+
+Please enter this OTP to complete your login or verification process. Do not share this code with anyone.
+
+If you did not request this code, please ignore this email and contact our support team immediately.
+
+Best regards,
+Railway Parcel Management System Team
+
+---
+Website built and maintained by Tanush Singhal
+For technical support, contact: support@railwayparcel.com
+© ${new Date().getFullYear()} Railway Parcel Management System. All rights reserved.
+`,
       
       html: `
         <html>
@@ -73,12 +77,13 @@ const sendOTPViaGmail = async (email, otp) => {
               <!-- Main Content -->
               <div style="padding: 40px 30px;">
                 <h2 style="color: #2c3e50; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
-                  Secure Access Code
+                  Your Secure OTP Code
                 </h2>
                 
                 <p style="color: #5a6c7d; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-                  Dear Valued Customer,<br><br>
-                  Your One-Time Password (OTP) has been generated for secure access to your Railway Parcel Management account.
+                  Dear Valued User,<br><br>
+                  Thank you for using the Railway Parcel Management System.<br>
+                  Your One-Time Password (OTP) has been generated for secure access to your account.
                 </p>
     
                 <!-- OTP Box -->
@@ -108,13 +113,13 @@ const sendOTPViaGmail = async (email, otp) => {
                 <!-- Security Notice -->
                 <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 30px 0;">
                   <p style="color: #856404; font-size: 14px; margin: 0; line-height: 1.5;">
-                    <strong>🔒 Security Notice:</strong> Railway Parcel Management System will never ask for your OTP via phone or email. 
-                    If you receive suspicious communications, please contact our support team immediately.
+                    <strong>🔒 Security Notice:</strong> We will never ask for your OTP via phone or email. If you receive suspicious communications, please contact our support team immediately.
                   </p>
                 </div>
     
                 <p style="color: #5a6c7d; font-size: 14px; line-height: 1.6; margin-top: 30px;">
-                  Thank you for using Railway Parcel Management System. We're committed to providing you with secure and efficient parcel management services.
+                  Thank you for trusting us with your parcel management needs.<br>
+                  For any assistance, contact <a href="mailto:support@railwayparcel.com" style="color: #3498db; text-decoration: none;">support@railwayparcel.com</a>.
                 </p>
     
                 <p style="color: #2c3e50; font-size: 16px; margin-top: 25px;">
@@ -134,11 +139,14 @@ const sendOTPViaGmail = async (email, otp) => {
                 
                 <!-- Developer Credit -->
                 <div style="border-top: 1px solid #34495e; padding-top: 15px; margin-top: 15px;">
-                  <p style="color: #95a5a6; font-size: 11px; margin: 0;">
-                    System developed by <strong style="color: #3498db;">Tanush Singhal</strong>
+                  <p style="color: #95a5a6; font-size: 13px; margin: 0;">
+                    <strong>Website built and maintained by Tanush Singhal</strong>
                   </p>
-                  <p style="color: #7f8c8d; font-size: 11px; margin: 5px 0 0 0;">
-                    For technical support, please contact our helpdesk
+                  <p style="color: #7f8c8d; font-size: 12px; margin: 5px 0 0 0;">
+                    For technical support, contact <a href="mailto:support@railwayparcel.com" style="color: #3498db; text-decoration: none;">support@railwayparcel.com</a>
+                  </p>
+                  <p style="color: #7f8c8d; font-size: 11px; margin: 10px 0 0 0;">
+                    &copy; ${new Date().getFullYear()} Railway Parcel Management System. All rights reserved.
                   </p>
                 </div>
               </div>
