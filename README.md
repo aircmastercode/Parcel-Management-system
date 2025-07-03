@@ -224,7 +224,9 @@ cd Parcel-Management-system
 
 ### **2. Start with Docker**
    ```bash
-docker-compose up -d
+docker-compose up --build
+docker-compose logs -f
+docker-compose down
 ```
 
 ### **3. Access the Application**
