@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   # Backend service
   server:
@@ -8,6 +6,7 @@ services:
     working_dir: /app
     command: >
       bash -c "
+        npm install &&
         apt-get update && 
         apt-get install -y python3 make g++ && 
         npm rebuild sqlite3 --build-from-source && 
@@ -17,6 +16,7 @@ services:
       - "8000:8000"
     volumes:
       - ./server:/app
+      - /app/node_modules
       - db-data:/app/data
       - uploads-data:/app/uploads
     environment:
@@ -39,6 +39,7 @@ services:
       - "3001:3000"
     volumes:
       - ./client:/app
+      - /app/node_modules
     depends_on:
       - server
     networks:
