@@ -507,18 +507,7 @@ docker-compose up --build
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
----
 
 **🚂 Railway Parcel Management System** - A comprehensive, enterprise-grade solution for modernizing railway parcel operations through innovative technology and robust architecture. Developed by Centre for Railway Information Systems (CRIS) to streamline logistics across the Indian Railways network.
 
@@ -538,13 +527,6 @@ For support and questions:
 - **Security Compliance**: 100% implementation
 - **User Adoption**: 92% sustained usage rate
 
-### Business Impact
-- **Annual Cost Savings**: ₹51,50,000
-- **3-Year ROI**: 342%
-- **Payback Period**: 8 months
-- **Staff Productivity**: 250% improvement
-- **Customer Satisfaction**: 90% rating
 
----
 
 *This system represents a landmark achievement in railway digitization, successfully addressing complex operational challenges through innovative technology implementation and establishing new benchmarks for transportation logistics systems.*
