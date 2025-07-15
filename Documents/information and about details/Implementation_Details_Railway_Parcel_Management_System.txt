@@ -1,0 +1,1102 @@
+IMPLEMENTATION DETAILS
+RAILWAY PARCEL MANAGEMENT SYSTEM
+Centre for Railway Information Systems (CRIS)
+
+================================================================================
+
+1. DEVELOPMENT ENVIRONMENT
+
+1.1 Setup and Configuration
+
+Development Environment Setup:
+- Node.js v18.17.0 (LTS)
+- npm v9.6.7 package manager
+- Git v2.40.0 for version control
+- VS Code with extensions (ESLint, Prettier, React DevTools)
+- Docker Desktop v4.20.0 for containerization
+- SQLite v3.42.0 for database
+
+Environment Configuration:
+```bash
+# Root package.json scripts
+{
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "docker:up": "docker-compose up --build"
+  }
+}
+```
+
+1.2 Development Tools Used
+
+Frontend Tools:
+- Vite v5.0.0 (build tool)
+- React DevTools (browser extension)
+- Tailwind CSS IntelliSense
+- ESLint v8.53.0 (code linting)
+- Prettier v3.0.0 (code formatting)
+
+Backend Tools:
+- Nodemon v3.0.1 (auto-restart)
+- Postman (API testing)
+- SQLite Browser (database management)
+- JWT Debugger (token inspection)
+
+1.3 Version Control Strategy
+
+Git Workflow:
+```bash
+# Feature branch workflow
+git checkout -b feature/user-authentication
+git add .
+git commit -m "feat: implement OTP-based authentication"
+git push origin feature/user-authentication
+git checkout main
+git merge feature/user-authentication
+```
+
+Branching Strategy:
+- main: Production-ready code
+- develop: Integration branch
+- feature/*: New features
+- hotfix/*: Critical bug fixes
+
+1.4 Testing Environment
+
+Testing Setup:
+- Jest v29.5.0 (unit testing)
+- React Testing Library (component testing)
+- Supertest v6.3.3 (API testing)
+- SQLite in-memory database for tests
+
+Test Configuration:
+```javascript
+// jest.config.js
+module.exports = {
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  moduleNameMapping: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  }
+}
+```
+
+================================================================================
+
+2. FRONTEND IMPLEMENTATION
+
+2.1 React Application Structure
+
+Project Structure:
+```
+client/src/
+├── components/          # Reusable components
+│   ├── DashboardLayout.jsx
+│   ├── LoadingSpinner.jsx
+│   ├── NotificationSystem.jsx
+│   └── ProtectedRoute.jsx
+├── context/            # React Context
+│   └── AuthContext.jsx
+├── pages/              # Page components
+│   ├── Login.jsx
+│   ├── Dashboard.jsx
+│   ├── Parcels.jsx
+│   └── Messages.jsx
+├── services/           # API services
+│   └── api.js
+├── utils/              # Utility functions
+│   └── qrGenerator.js
+├── App.jsx             # Main app component
+└── main.jsx           # Entry point
+```
+
+2.2 Component Hierarchy
+
+Main Component Tree:
+```jsx
+// App.jsx - Main application structure
+function App() {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+```
+
+2.3 State Management
+
+Context API Implementation:
+```jsx
+// AuthContext.jsx
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const login = async (email, otp) => {
+    try {
+      const response = await api.post('/auth/verify-otp', { email, otp });
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      setCurrentUser(user);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.message };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setCurrentUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ currentUser, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+```
+
+2.4 User Interface Design
+
+Tailwind CSS Implementation:
+```jsx
+// DashboardLayout.jsx - Responsive design
+const DashboardLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <FaTrain className="w-8 h-8 text-blue-600" />
+              <span className="ml-2 text-xl font-semibold text-gray-900">
+                Railway PMS
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">{currentUser?.name}</span>
+              <button onClick={logout} className="text-red-600 hover:text-red-800">
+                <FaSignOutAlt className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
+    </div>
+  );
+};
+```
+
+2.5 Responsive Design Implementation
+
+Mobile-First Approach:
+```css
+/* Tailwind responsive classes */
+.container {
+  @apply px-4 sm:px-6 lg:px-8; /* Responsive padding */
+}
+
+.grid {
+  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3; /* Responsive grid */
+}
+
+.sidebar {
+  @apply fixed inset-y-0 left-0 transform -translate-x-full 
+         md:relative md:translate-x-0 transition duration-200 ease-in-out;
+}
+```
+
+================================================================================
+
+3. BACKEND IMPLEMENTATION
+
+3.1 Express.js Server Setup
+
+Server Configuration:
+```javascript
+// server.js - Main server file
+const express = require('express');
+const cors = require('cors');
+const fileUpload = require('express-fileupload');
+const { sequelize } = require('./models');
+
+const app = express();
+const PORT = process.env.PORT || 8000;
+
+// Middleware setup
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  createParentPath: true
+}));
+
+// Static file serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// API routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/parcels', require('./routes/parcels'));
+app.use('/api/messages', require('./routes/messages'));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+3.2 API Endpoint Design
+
+RESTful API Structure:
+```javascript
+// routes/parcels.js - Parcel endpoints
+const express = require('express');
+const router = express.Router();
+const auth = require('../middlewares/auth');
+const parcelController = require('../controllers/parcelController');
+
+// GET /api/parcels - Get all parcels for station
+router.get('/', auth, parcelController.getParcels);
+
+// POST /api/parcels - Create new parcel
+router.post('/', auth, parcelController.createParcel);
+
+// PUT /api/parcels/:id/status - Update parcel status
+router.put('/:id/status', auth, parcelController.updateStatus);
+
+// GET /api/parcels/:id - Get parcel details
+router.get('/:id', auth, parcelController.getParcel);
+
+module.exports = router;
+```
+
+3.3 Middleware Implementation
+
+Authentication Middleware:
+```javascript
+// middlewares/auth.js
+const jwt = require('jsonwebtoken');
+const { User } = require('../models');
+
+const auth = async (req, res, next) => {
+  try {
+    const token = req.header('x-auth-token');
+    if (!token) {
+      return res.status(401).json({ message: 'No token, authorization denied' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.userId, {
+      include: [{ model: require('../models/Station'), as: 'station' }]
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Token is not valid' });
+  }
+};
+
+module.exports = auth;
+```
+
+3.4 Error Handling
+
+Centralized Error Handling:
+```javascript
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error(error.stack);
+  
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation Error',
+      errors: error.errors
+    });
+  }
+  
+  if (error.name === 'SequelizeUniqueConstraintError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Duplicate entry found'
+    });
+  }
+  
+  res.status(500).json({
+    success: false,
+    message: 'Internal Server Error'
+  });
+});
+```
+
+3.5 Security Implementations
+
+Input Validation:
+```javascript
+// controllers/parcelController.js
+const { body, validationResult } = require('express-validator');
+
+const createParcel = [
+  body('sender_name').trim().isLength({ min: 2 }).escape(),
+  body('receiver_name').trim().isLength({ min: 2 }).escape(),
+  body('weight').isFloat({ min: 0.1, max: 1000 }),
+  body('description').trim().isLength({ max: 500 }).escape(),
+  
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+    
+    // Process parcel creation
+    try {
+      const parcel = await Parcel.create({
+        ...req.body,
+        tracking_number: generateTrackingNumber(),
+        sender_station_id: req.user.station_id
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: parcel
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creating parcel'
+      });
+    }
+  }
+];
+```
+
+================================================================================
+
+4. DATABASE IMPLEMENTATION
+
+4.1 SQLite Database Design
+
+Database Configuration:
+```javascript
+// models/index.js - Database setup
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: process.env.DB_PATH || './database.sqlite',
+  logging: console.log
+});
+
+// Test connection
+sequelize.authenticate()
+  .then(() => console.log('Database connected'))
+  .catch(err => console.error('Database connection error:', err));
+```
+
+4.2 Table Structures and Relationships
+
+User Model:
+```javascript
+// models/User.js
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define('User', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
+    },
+    phone: DataTypes.STRING,
+    station_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'stations',
+        key: 'id'
+      }
+    },
+    role: {
+      type: DataTypes.ENUM('user', 'admin', 'master'),
+      defaultValue: 'user'
+    },
+    last_otp: DataTypes.STRING,
+    otp_expires_at: DataTypes.DATE
+  }, {
+    tableName: 'users',
+    timestamps: true
+  });
+
+  User.associate = (models) => {
+    User.belongsTo(models.Station, {
+      foreignKey: 'station_id',
+      as: 'station'
+    });
+  };
+
+  return User;
+};
+```
+
+Parcel Model:
+```javascript
+// models/Parcel.js
+module.exports = (sequelize, DataTypes) => {
+  const Parcel = sequelize.define('Parcel', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    tracking_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    sender_station_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'stations',
+        key: 'id'
+      }
+    },
+    receiver_station_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'stations',
+        key: 'id'
+      }
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'in_transit', 'delivered', 'returned', 'lost'),
+      defaultValue: 'pending'
+    },
+    weight: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      validate: {
+        min: 0.1,
+        max: 1000
+      }
+    },
+    description: DataTypes.TEXT,
+    sender_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    receiver_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    sender_contact: DataTypes.STRING,
+    receiver_contact: DataTypes.STRING,
+    image_url: DataTypes.STRING
+  }, {
+    tableName: 'parcels',
+    timestamps: true
+  });
+
+  Parcel.associate = (models) => {
+    Parcel.belongsTo(models.Station, {
+      foreignKey: 'sender_station_id',
+      as: 'senderStation'
+    });
+    Parcel.belongsTo(models.Station, {
+      foreignKey: 'receiver_station_id',
+      as: 'receiverStation'
+    });
+    Parcel.hasMany(models.Message, {
+      foreignKey: 'parcel_id',
+      as: 'messages'
+    });
+  };
+
+  return Parcel;
+};
+```
+
+4.3 Indexing Strategy
+
+Database Indexes:
+```sql
+-- Primary indexes (automatic)
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_parcels_tracking_number ON parcels(tracking_number);
+CREATE INDEX idx_stations_code ON stations(code);
+
+-- Composite indexes for common queries
+CREATE INDEX idx_parcels_station_status ON parcels(sender_station_id, status);
+CREATE INDEX idx_messages_parcel_station ON messages(parcel_id, from_station);
+
+-- Foreign key indexes
+CREATE INDEX idx_users_station_id ON users(station_id);
+CREATE INDEX idx_parcels_sender_station ON parcels(sender_station_id);
+CREATE INDEX idx_parcels_receiver_station ON parcels(receiver_station_id);
+```
+
+4.4 Data Validation
+
+Sequelize Validation:
+```javascript
+// Enhanced validation in models
+const Parcel = sequelize.define('Parcel', {
+  tracking_number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      len: [10, 15],
+      is: /^PMS-[A-Z0-9]{8}$/
+    }
+  },
+  weight: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    validate: {
+      min: 0.1,
+      max: 1000
+    }
+  },
+  sender_contact: {
+    type: DataTypes.STRING,
+    validate: {
+      is: /^[0-9]{10}$/
+    }
+  }
+});
+```
+
+4.5 Backup and Recovery
+
+Database Backup Strategy:
+```javascript
+// utils/backup.js
+const fs = require('fs');
+const path = require('path');
+
+const backupDatabase = () => {
+  const dbPath = path.join(__dirname, '../database.sqlite');
+  const backupPath = path.join(__dirname, `../backups/db-${Date.now()}.sqlite`);
+  
+  fs.copyFileSync(dbPath, backupPath);
+  console.log(`Database backed up to: ${backupPath}`);
+};
+
+// Scheduled backup (daily at 2 AM)
+const schedule = require('node-schedule');
+schedule.scheduleJob('0 2 * * *', backupDatabase);
+```
+
+================================================================================
+
+5. KEY FEATURES IMPLEMENTATION
+
+5.1 User Authentication System (OTP-based)
+
+OTP Generation and Email:
+```javascript
+// utils/otpGenerator.js
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+const generateOTP = () => {
+  return crypto.randomInt(100000, 999999).toString();
+};
+
+const sendOTP = async (email, otp) => {
+  // Primary email service (Gmail)
+  const transporter = nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
+    }
+  });
+
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: email,
+    subject: 'Railway PMS - Login OTP',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1e40af;">Railway Parcel Management System</h2>
+        <p>Your login OTP is: <strong style="font-size: 24px; color: #1e40af;">${otp}</strong></p>
+        <p>This OTP will expire in 10 minutes.</p>
+        <p>If you didn't request this OTP, please ignore this email.</p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    // Fallback to Postmark
+    return await sendOTPPostmark(email, otp);
+  }
+};
+```
+
+5.2 Role-Based Access Control
+
+RBAC Implementation:
+```javascript
+// middlewares/rbac.js
+const checkRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Insufficient permissions' });
+    }
+    
+    next();
+  };
+};
+
+const checkStationAccess = (req, res, next) => {
+  const { station_id } = req.params;
+  
+  if (req.user.role === 'master') {
+    return next(); // Master users can access all stations
+  }
+  
+  if (req.user.station_id.toString() !== station_id) {
+    return res.status(403).json({ message: 'Access denied to this station' });
+  }
+  
+  next();
+};
+
+module.exports = { checkRole, checkStationAccess };
+```
+
+5.3 Parcel Booking Functionality
+
+Parcel Creation:
+```javascript
+// controllers/parcelController.js
+const createParcel = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    // Generate unique tracking number
+    const trackingNumber = `PMS-${Date.now().toString(36).toUpperCase()}`;
+    
+    // Handle image upload
+    let imageUrl = null;
+    if (req.files && req.files.image) {
+      const file = req.files.image;
+      const fileName = `PMS-${trackingNumber}-${Date.now()}.${file.mimetype.split('/')[1]}`;
+      const uploadPath = path.join(__dirname, '../uploads/parcels/', fileName);
+      
+      await file.mv(uploadPath);
+      imageUrl = `/uploads/parcels/${fileName}`;
+    }
+    
+    // Create parcel
+    const parcel = await Parcel.create({
+      ...req.body,
+      tracking_number: trackingNumber,
+      sender_station_id: req.user.station_id,
+      image_url: imageUrl
+    }, { transaction });
+    
+    // Create initial message
+    await Message.create({
+      from_station: req.user.station_id,
+      to_station: req.body.receiver_station_id,
+      parcel_id: parcel.id,
+      content: `New parcel ${trackingNumber} created from ${req.user.station.name}`,
+      read: false
+    }, { transaction });
+    
+    await transaction.commit();
+    
+    res.status(201).json({
+      success: true,
+      data: parcel,
+      message: 'Parcel created successfully'
+    });
+  } catch (error) {
+    await transaction.rollback();
+    res.status(500).json({
+      success: false,
+      message: 'Error creating parcel'
+    });
+  }
+};
+```
+
+5.4 Real-Time Tracking System
+
+Tracking Implementation:
+```javascript
+// controllers/trackingController.js
+const updateParcelStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  try {
+    const parcel = await Parcel.findByPk(id, {
+      include: [
+        { model: Station, as: 'senderStation' },
+        { model: Station, as: 'receiverStation' }
+      ]
+    });
+    
+    if (!parcel) {
+      return res.status(404).json({ message: 'Parcel not found' });
+    }
+    
+    // Update status
+    await parcel.update({ status });
+    
+    // Create status update message
+    await Message.create({
+      from_station: req.user.station_id,
+      to_station: parcel.receiver_station_id,
+      parcel_id: parcel.id,
+      content: `Parcel ${parcel.tracking_number} status updated to ${status}`,
+      read: false
+    });
+    
+    // Broadcast to master station
+    const masterStation = await Station.findOne({ where: { is_master: true } });
+    if (masterStation && masterStation.id !== req.user.station_id) {
+      await Message.create({
+        from_station: req.user.station_id,
+        to_station: masterStation.id,
+        parcel_id: parcel.id,
+        content: `Parcel ${parcel.tracking_number} status: ${status}`,
+        read: false,
+        is_master_copied: true
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: parcel,
+      message: 'Status updated successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating status'
+    });
+  }
+};
+```
+
+5.5 Inter-Station Communication
+
+Message System:
+```javascript
+// controllers/messageController.js
+const sendMessage = async (req, res) => {
+  const { to_station, parcel_id, content } = req.body;
+  
+  try {
+    const message = await Message.create({
+      from_station: req.user.station_id,
+      to_station,
+      parcel_id,
+      content,
+      read: false
+    });
+    
+    // Broadcast to all stations for transparency
+    const allStations = await Station.findAll();
+    const broadcastMessages = allStations
+      .filter(station => station.id !== req.user.station_id && station.id !== to_station)
+      .map(station => ({
+        from_station: req.user.station_id,
+        to_station: station.id,
+        parcel_id,
+        content,
+        read: false,
+        is_master_copied: station.is_master
+      }));
+    
+    if (broadcastMessages.length > 0) {
+      await Message.bulkCreate(broadcastMessages);
+    }
+    
+    res.status(201).json({
+      success: true,
+      data: message,
+      message: 'Message sent successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error sending message'
+    });
+  }
+};
+```
+
+================================================================================
+
+6. INTEGRATION CHALLENGES
+
+6.1 Database Connectivity
+
+Connection Management:
+```javascript
+// Database connection with retry logic
+const connectDatabase = async (retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await sequelize.authenticate();
+      console.log('Database connected successfully');
+      return true;
+    } catch (error) {
+      console.error(`Database connection attempt ${i + 1} failed:`, error.message);
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+};
+```
+
+6.2 API Integration
+
+Frontend-Backend Communication:
+```javascript
+// services/api.js - Axios configuration
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',
+  timeout: 10000
+});
+
+// Request interceptor for authentication
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['x-auth-token'] = token;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+6.3 Third-Party Service Integration
+
+Email Service Fallback:
+```javascript
+// Multi-service email with automatic fallback
+const sendEmailWithFallback = async (email, subject, html) => {
+  const services = [
+    { name: 'Gmail', config: gmailConfig },
+    { name: 'Postmark', config: postmarkConfig },
+    { name: 'RapidAPI', config: rapidApiConfig }
+  ];
+  
+  for (const service of services) {
+    try {
+      const transporter = nodemailer.createTransporter(service.config);
+      await transporter.sendMail({ to: email, subject, html });
+      console.log(`Email sent via ${service.name}`);
+      return { success: true, service: service.name };
+    } catch (error) {
+      console.error(`${service.name} failed:`, error.message);
+      continue;
+    }
+  }
+  
+  throw new Error('All email services failed');
+};
+```
+
+================================================================================
+
+7. CODE QUALITY
+
+7.1 Coding Standards
+
+ESLint Configuration:
+```javascript
+// .eslintrc.js
+module.exports = {
+  env: {
+    browser: true,
+    es2021: true,
+    node: true
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended'
+  ],
+  rules: {
+    'no-unused-vars': 'error',
+    'no-console': 'warn',
+    'prefer-const': 'error',
+    'no-var': 'error'
+  }
+};
+```
+
+7.2 Documentation Practices
+
+JSDoc Comments:
+```javascript
+/**
+ * Creates a new parcel in the system
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {string} req.body.sender_name - Name of sender
+ * @param {string} req.body.receiver_name - Name of receiver
+ * @param {number} req.body.weight - Weight of parcel in kg
+ * @param {string} req.body.description - Description of parcel
+ * @returns {Object} JSON response with parcel data
+ */
+const createParcel = async (req, res) => {
+  // Implementation
+};
+```
+
+7.3 Testing Methodology
+
+Unit Tests:
+```javascript
+// __tests__/parcelController.test.js
+const request = require('supertest');
+const app = require('../server');
+const { Parcel, User, Station } = require('../models');
+
+describe('Parcel Controller', () => {
+  beforeEach(async () => {
+    await sequelize.sync({ force: true });
+  });
+  
+  test('should create new parcel', async () => {
+    const user = await User.create({
+      name: 'Test User',
+      email: 'test@example.com',
+      station_id: 1
+    });
+    
+    const response = await request(app)
+      .post('/api/parcels')
+      .set('x-auth-token', generateToken(user))
+      .send({
+        receiver_station_id: 2,
+        sender_name: 'John Doe',
+        receiver_name: 'Jane Smith',
+        weight: 2.5,
+        description: 'Test parcel'
+      });
+    
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.tracking_number).toMatch(/^PMS-/);
+  });
+});
+```
+
+7.4 Performance Optimization
+
+Frontend Optimization:
+```javascript
+// React.memo for component optimization
+const ParcelCard = React.memo(({ parcel, onStatusUpdate }) => {
+  return (
+    <div className="bg-white rounded-lg shadow p-4">
+      <h3 className="font-semibold">{parcel.tracking_number}</h3>
+      <p className="text-gray-600">{parcel.description}</p>
+      <StatusBadge status={parcel.status} />
+    </div>
+  );
+});
+
+// Lazy loading for routes
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Parcels = lazy(() => import('./pages/Parcels'));
+```
+
+Backend Optimization:
+```javascript
+// Database query optimization
+const getParcelsWithDetails = async (stationId) => {
+  return await Parcel.findAll({
+    where: {
+      [Op.or]: [
+        { sender_station_id: stationId },
+        { receiver_station_id: stationId }
+      ]
+    },
+    include: [
+      { model: Station, as: 'senderStation', attributes: ['name', 'code'] },
+      { model: Station, as: 'receiverStation', attributes: ['name', 'code'] }
+    ],
+    order: [['createdAt', 'DESC']],
+    limit: 50
+  });
+};
+```
+
+================================================================================
+
+The implementation details demonstrate a comprehensive, production-ready Railway Parcel Management System with modern development practices, robust error handling, and scalable architecture. The system successfully addresses the complex requirements of multi-station railway operations while maintaining code quality and performance standards.
+
+================================================================================ 
